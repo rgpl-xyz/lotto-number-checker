@@ -1,0 +1,30 @@
+<div class="winning-input-container">
+  <p class="instruction">Enter or paste 6 numbers between 1 and 59:</p>
+
+  <div class="number-inputs">
+    @for (numberInput of numberInputs(); track $index) {
+    <div class="input-container">
+      <label [for]="'number-input-' + $index" class="input-label">Number {{$index + 1}}</label>
+      <input
+        type="number"
+        min="1"
+        max="59"
+        [id]="'number-input-' + $index"
+        [value]="numberInput"
+        (input)="updateNumber($index, $any($event.target).value)"
+        (paste)="parseInputString($event)"
+        (keydown)="handleKeyDown($event, $index)"
+        class="number-input"
+      />
+    </div>
+    }
+  </div>
+
+  <button
+    class="submit-button"
+    [disabled]="!isValid()"
+    (click)="submitWinningNumbers()"
+  >
+    Set Winning Numbers
+  </button>
+</div>

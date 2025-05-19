@@ -1,0 +1,71 @@
+<div class="number-display-container">
+  @if (winningNumbers().length === 0) {
+  <p class="info-message">Enter winning numbers first</p>
+  }
+
+  <div class="number-entry">
+    <div class="input-group">
+      <label for="number-input">Enter your numbers</label>
+      <input
+        id="number-input"
+        type="number"
+        min="1"
+        max="59"
+        [value]="inputNumber()"
+        (input)="inputNumber.set($any($event.target).value)"
+        (keydown.enter)="addNumber()"
+        placeholder="Enter a number (1-59)"
+        class="number-input"
+      />
+      <button
+        (click)="addNumber()"
+        [disabled]="!isInputValid()"
+        class="add-button"
+      >
+        Add Number
+      </button>
+    </div>
+  </div>
+
+  @if (userNumbers().length > 0) {
+  <div class="user-numbers">
+    <h3>Your Numbers:</h3>
+
+    @for (row of userNumberRows(); track $index; let rowIndex = $index) {
+    <div class="data-row" [class.matches-info]="hasHighestMatches(rowIndex)" [class.editing]="isEditingRow(rowIndex)">
+      <div class="number-row">
+        <div class="row-label">{{ rowLabels()[rowIndex] }}</div>
+        @if (isEditingRow(rowIndex)) {
+          @for (num of row; track num; let numIndex = $index) {
+          <div class="number-badge" [class.matching]="isMatching(num)">
+            {{ num }}
+            <button class="edit-number" (click)="editNumber(rowIndex, numIndex)">✎</button>
+          </div>
+          }
+        } @else {
+          @for (num of row; track num) {
+          <div class="number-badge" [class.matching]="isMatching(num)">
+            {{ num }}
+          </div>
+          }
+        }
+      </div>
+      <div class="row-actions">
+        @if (!isEditingRow(rowIndex)) {
+        <button class="edit-button" (click)="editRow(rowIndex)">Edit</button>
+        <button class="delete-button" (click)="deleteRow(rowIndex)">Delete</button>
+        } @else {
+        <button class="done-button" (click)="finishEditing()">Done</button>
+        }
+      </div>
+    </div>
+    } @if (highestMatchCount() > 0) {
+    <div class="matches-info">
+      <p>Your highest matching row has {{ highestMatchCount() }} matching numbers!</p>
+    </div>
+    }
+
+    <button class="clear-button" (click)="clearNumbers()">Clear All</button>
+  </div>
+  }
+</div>

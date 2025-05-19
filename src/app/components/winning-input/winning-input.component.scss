@@ -1,0 +1,22 @@
+.winning-input-container {
+  margin-bottom: 20px;
+  
+  .instruction {
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  .number-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 1rem;
+  }
+
+  .submit-button {
+    display: block;
+    margin: 0 auto;
+    padding: 12px 24px;
+  }
+}

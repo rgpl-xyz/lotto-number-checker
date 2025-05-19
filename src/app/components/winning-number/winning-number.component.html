@@ -1,0 +1,32 @@
+<div class="container">
+  <h1>{{ title() }}</h1>
+
+  <div class="card">
+    @if (isEditMode()) {
+    <h2 class="numbers-title">Enter Winning Numbers</h2>
+    <app-winning-input 
+      (winningNumbersSet)="setWinningNumbers($event)" 
+      [(numbersToEdit)]="winningNumbers"
+    />
+    } @else {
+    <div class="winning-numbers-display">
+      <h2 class="numbers-title">Winning Numbers</h2>
+
+      <div class="number-list">
+        @for (num of winningNumbers(); track num) {
+        <div class="number-badge winning">{{ num }}</div>
+        }
+        <button class="edit-button" (click)="editWinningNumbers()">Edit</button>
+      </div>
+    </div>
+    }
+  </div>
+
+  <div class="card">
+    <h2 class="numbers-title">Check Your Numbers</h2>
+    <app-number-display
+      [winningNumbers]="winningNumbers()"
+      (editWinningNumbers)="editWinningNumbers()"
+    />
+  </div>
+</div>
