@@ -1,0 +1,165 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  // Colors
+  --primary-color: #3f51b5;
+  --secondary-color: #c41c1c;
+  --darker-secondary-color: #9a0000;
+  --accent-color: #4caf50;
+  --text-color: #212121;
+  --light-gray: #e0e0e0;
+  --matching-color: #ffc107;
+  --winning-color: #673ab7;
+  
+  // LCH Colors
+  --bright-blue: oklch(51.01% 0.274 263.83);
+  --electric-violet: oklch(53.18% 0.28 296.97);
+  --french-violet: oklch(47.66% 0.246 305.88);
+  --vivid-pink: oklch(69.02% 0.277 332.77);
+  --hot-red: oklch(61.42% 0.238 15.34);
+  --orange-red: oklch(63.32% 0.24 31.68);
+
+  // Grays
+  --gray-900: oklch(19.37% 0.006 300.98);
+  --gray-700: oklch(36.98% 0.014 302.71);
+  --gray-400: oklch(70.9% 0.015 304.04);
+
+  // Gradients
+  --red-to-pink-to-purple-vertical-gradient: linear-gradient(
+    180deg,
+    var(--orange-red) 0%,
+    var(--vivid-pink) 50%,
+    var(--electric-violet) 100%
+  );
+
+  --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
+    90deg,
+    var(--orange-red) 0%,
+    var(--vivid-pink) 50%,
+    var(--electric-violet) 100%
+  );
+
+  // Typography
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: var(--text-color);
+}
+
+// Layout
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.content {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 3rem;
+
+  @media screen and (max-width: 650px) {
+    flex-direction: column;
+    width: max-content;
+  }
+}
+
+// Typography
+h1, h2, h3 {
+  color: var(--primary-color);
+}
+
+h3 {
+  color: var(--text-color);
+}
+
+p {
+  margin: 0;
+  color: var(--gray-700);
+}
+
+// Components
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+// Form elements
+.number-input {
+  width: 60px;
+  padding: 10px;
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 16px;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #303f9f;
+  }
+
+  &:disabled {
+    background-color: var(--gray-400);
+    color: var(--gray-900);
+    cursor: not-allowed;
+    opacity: 0.8;
+    border: 1px solid var(--gray-700);
+    position: relative;
+  }
+}
+
+// Common layout patterns
+.number-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .input-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+}
