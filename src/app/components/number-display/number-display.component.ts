@@ -1,11 +1,19 @@
-import { Component, computed, signal, input, output } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+  Component,
+  computed,
+  signal,
+  input,
+  output,
+  inject,
+} from '@angular/core';
 
 @Component({
   selector: 'app-number-display',
   standalone: true,
   imports: [],
   templateUrl: './number-display.component.html',
-  styleUrl: './number-display.component.scss'
+  styleUrl: './number-display.component.scss',
 })
 export class NumberDisplayComponent {
   winningNumbers = input<number[]>([]);
@@ -14,25 +22,27 @@ export class NumberDisplayComponent {
   userNumbers = signal<number[]>([]);
   editingRowIndex = signal<number | null>(null);
 
+  document = inject(DOCUMENT);
+
   matchingNumbers = computed(() => {
     if (!this.winningNumbers().length) return [];
 
-    return this.userNumbers().filter(num =>
-      this.winningNumbers().some(winNum => Number(winNum) === Number(num))
+    return this.userNumbers().filter((num) =>
+      this.winningNumbers().some((winNum) => Number(winNum) === Number(num))
     );
   });
 
   userNumberRows = computed(() => {
     const numbers = this.userNumbers();
     const rows: number[][] = [];
-    
+
     for (let i = 0; i < numbers.length; i += 6) {
       rows.push(numbers.slice(i, i + 6));
     }
-    
+
     return rows;
   });
-  
+
   rowLabels = computed(() => {
     const rows = this.userNumberRows();
     return rows.map((_, index) => this.generateRowLabel(index));
@@ -40,9 +50,9 @@ export class NumberDisplayComponent {
 
   matchesPerRow = computed(() => {
     if (!this.winningNumbers().length) return [];
-    
-    return this.userNumberRows().map(row => 
-      row.filter(num => this.isMatching(num)).length
+
+    return this.userNumberRows().map(
+      (row) => row.filter((num) => this.isMatching(num)).length
     );
   });
 
@@ -64,6 +74,14 @@ export class NumberDisplayComponent {
     return !isNaN(num) && num >= 1 && num <= 59;
   });
 
+  setNumberInput(value: number): void {
+    this.inputNumber.set(value);
+
+    if (this.isInputValid() && `${value}`.length > 1) {
+      this.addNumber();
+    }
+  }
+
   addNumber(): void {
     const num = this.inputNumber();
     if (!num) return;
@@ -71,7 +89,7 @@ export class NumberDisplayComponent {
     if (!isNaN(num) && num >= 1 && num <= 59) {
       const numValue = Number(num);
       const numbers = this.userNumbers();
-      
+
       // Get the current row's numbers (last row or partial row)
       const rowSize = 6;
       const lastRowStartIndex = Math.floor(numbers.length / rowSize) * rowSize;
@@ -79,13 +97,13 @@ export class NumberDisplayComponent {
 
       // Only check duplicates within the current row
       const isDuplicateInCurrentRow = currentRowNumbers.includes(numValue);
-      
+
       // Add number only if it's not a duplicate in current row
       // Or if the current row is full (start a new row)
       if (!isDuplicateInCurrentRow || currentRowNumbers.length >= rowSize) {
-        this.userNumbers.update(nums => [...nums, numValue]);
+        this.userNumbers.update((nums) => [...nums, numValue]);
       }
-      
+
       this.inputNumber.set(undefined);
     }
   }
@@ -95,7 +113,9 @@ export class NumberDisplayComponent {
   }
 
   isMatching(num: number): boolean {
-    return this.winningNumbers().some(winNum => Number(winNum) === Number(num));
+    return this.winningNumbers().some(
+      (winNum) => Number(winNum) === Number(num)
+    );
   }
 
   hasHighestMatches(rowIndex: number): boolean {
@@ -109,18 +129,20 @@ export class NumberDisplayComponent {
   deleteRow(rowIndex: number): void {
     const rowsPerPage = 6;
     const startIndex = rowIndex * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    
-    this.userNumbers.update(numbers => {
+
+    this.userNumbers.update((numbers) => {
       const newNumbers = [...numbers];
-      newNumbers.splice(startIndex, Math.min(rowsPerPage, newNumbers.length - startIndex));
+      newNumbers.splice(
+        startIndex,
+        Math.min(rowsPerPage, newNumbers.length - startIndex)
+      );
       return newNumbers;
     });
   }
 
   deleteNumber(rowIndex: number, numberIndex: number): void {
     const actualIndex = rowIndex * 6 + numberIndex;
-    this.userNumbers.update(numbers => {
+    this.userNumbers.update((numbers) => {
       const newNumbers = [...numbers];
       newNumbers.splice(actualIndex, 1);
       return newNumbers;
@@ -132,46 +154,45 @@ export class NumberDisplayComponent {
   }
 
   editNumber(rowIndex: number, numberIndex: number): void {
-    console.log('Editing number at row:', rowIndex, 'number index:', numberIndex);
-    
     const actualIndex = rowIndex * 6 + numberIndex;
-    console.log('Calculated actual index:', actualIndex);
-    console.log('Current numbers array:', this.userNumbers());
-    
     const currentValue = this.userNumbers()[actualIndex];
-    console.log('Current value:', currentValue);
-    
+
     // Use prompt dialog for editing
-    const newValueStr = prompt('Edit number:', currentValue.toString());
-    if (newValueStr === null) return; // User cancelled
-    
+    const newValueStr = this.document.defaultView?.prompt(
+      'Edit number:',
+      currentValue.toString()
+    );
+    if (!newValueStr) return; // User cancelled
+
     const newValue = parseInt(newValueStr, 10);
-    
+
     // Validate input
     if (isNaN(newValue) || newValue < 1 || newValue > 59) {
       alert('Please enter a valid number between 1 and 59');
       return;
     }
-    
+
     // Check for duplicates in the same row
     const rowStartIndex = rowIndex * 6;
     const rowEndIndex = Math.min(rowStartIndex + 6, this.userNumbers().length);
     const rowNumbers = this.userNumbers().slice(rowStartIndex, rowEndIndex);
-    
+
     // Check if this would create a duplicate in the row
     const wouldCreateDuplicate = rowNumbers.some((n, i) => {
       // Skip comparing with the number we're editing
       if (rowStartIndex + i === actualIndex) return false;
       return n === newValue;
     });
-    
+
     if (wouldCreateDuplicate) {
-      alert('This number already exists in the current row');
+      this.document.defaultView?.alert(
+        'This number already exists in the current row'
+      );
       return;
     }
-    
+
     // Update the number
-    this.userNumbers.update(numbers => {
+    this.userNumbers.update((numbers) => {
       const newNumbers = [...numbers];
       newNumbers[actualIndex] = newValue;
       return newNumbers;
@@ -186,11 +207,11 @@ export class NumberDisplayComponent {
   private generateRowLabel(index: number): string {
     const letterCount = 26; // A-Z
     const baseCharCode = 'A'.charCodeAt(0);
-    
+
     const cycleNumber = Math.floor(index / letterCount);
     const letterIndex = index % letterCount;
     const letter = String.fromCharCode(baseCharCode + letterIndex);
-    
+
     return cycleNumber === 0 ? letter : `${letter}${cycleNumber}`;
   }
 }

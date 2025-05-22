@@ -12,7 +12,7 @@
         min="1"
         max="59"
         [value]="inputNumber()"
-        (input)="inputNumber.set($any($event.target).value)"
+        (input)="setNumberInput($any($event.target).value)"
         (keydown.enter)="addNumber()"
         placeholder="Enter a number (1-59)"
         class="number-input"
