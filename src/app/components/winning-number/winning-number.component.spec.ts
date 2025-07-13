@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WinningNumberComponent } from './winning-number.component';
 import { WinningInputComponent } from '../winning-input/winning-input.component';
 import { NumberDisplayComponent } from '../number-display/number-display.component';
+import { SearchResultsComponent } from '../search-results/search-results.component';
 
 describe('WinningNumberComponent', () => {
   let component: WinningNumberComponent;
@@ -12,10 +13,10 @@ describe('WinningNumberComponent', () => {
       imports: [
         WinningNumberComponent,
         WinningInputComponent,
-        NumberDisplayComponent
-      ]
-    })
-    .compileComponents();
+        NumberDisplayComponent,
+        SearchResultsComponent,
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(WinningNumberComponent);
     component = fixture.componentInstance;
@@ -34,9 +35,9 @@ describe('WinningNumberComponent', () => {
 
   it('should set winning numbers and toggle edit mode', () => {
     const testNumbers = [1, 2, 3, 4, 5, 6];
-    
+
     component.setWinningNumbers(testNumbers);
-    
+
     expect(component.winningNumbers()).toEqual(testNumbers);
     expect(component.isEditMode()).toBe(false);
   });
@@ -45,11 +46,23 @@ describe('WinningNumberComponent', () => {
     // First set edit mode to false
     component.isEditMode.set(false);
     expect(component.isEditMode()).toBe(false);
-    
+
     // Call the editWinningNumbers method
     component.editWinningNumbers();
-    
+
     // Expect edit mode to be true now
     expect(component.isEditMode()).toBe(true);
+  });
+
+  it('should have useSearch default to false', () => {
+    expect(component.useSearch()).toBe(false);
+  });
+
+  it('should toggle useSearch when checkbox is changed', () => {
+    component.useSearch.set(true);
+    expect(component.useSearch()).toBe(true);
+
+    component.useSearch.set(false);
+    expect(component.useSearch()).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, map, catchError, tap } from 'rxjs';
+import { Observable, of, map, catchError, tap } from 'rxjs';
 import { signal, computed } from '@angular/core';
 import { GAME_SELECTION_OPTIONS, LottoResult } from '../models/lotto.model';
 
@@ -35,14 +35,9 @@ export class LottoService {
     const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
 
     if (!forceRefresh && this._cachedResults().length > 0 && cacheValid) {
-      // Return cached data immediately
-      return new Observable<LottoResult[]>((observer) => {
-        observer.next(this._cachedResults());
-        observer.complete();
-      });
+      return of(this._cachedResults());
     }
 
-    // Fetch fresh data
     return this.fetchLottoResults();
   }
 
