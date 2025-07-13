@@ -4,11 +4,11 @@
   border-bottom: 1px solid var(--light-gray);
 }
 
-.header-with-edit {
+.number-list {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .number-badge {
@@ -29,6 +29,21 @@
   &.matching {
     background-color: var(--matching-color);
     color: black;
+  }
+}
+
+.search {
+  font-size: 14px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: -1rem;
+  padding-bottom: 1rem;
+
+  input {
+    margin-left: 0;
+    margin-right: 5px;
   }
 }
 
