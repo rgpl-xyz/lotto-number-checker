@@ -16,13 +16,13 @@ import {
   styleUrl: './number-display.component.scss',
 })
 export class NumberDisplayComponent {
-  winningNumbers = input<number[]>([]);
-  editWinningNumbers = output<void>();
-  inputNumber = signal<number | undefined>(undefined);
-  userNumbers = signal<number[]>([]);
-  editingRowIndex = signal<number | null>(null);
+  readonly winningNumbers = input<number[]>([]);
+  readonly editWinningNumbers = output<void>();
+  readonly inputNumber = signal<number | undefined>(undefined);
+  readonly userNumbers = signal<number[]>([]);
+  readonly editingRowIndex = signal<number | null>(null);
 
-  document = inject(DOCUMENT);
+  private readonly document = inject(DOCUMENT);
 
   matchingNumbers = computed(() => {
     if (!this.winningNumbers().length) return [];
@@ -43,12 +43,12 @@ export class NumberDisplayComponent {
     return rows;
   });
 
-  rowLabels = computed(() => {
+  readonly rowLabels = computed(() => {
     const rows = this.userNumberRows();
     return rows.map((_, index) => this.generateRowLabel(index));
   });
 
-  matchesPerRow = computed(() => {
+  readonly matchesPerRow = computed(() => {
     if (!this.winningNumbers().length) return [];
 
     return this.userNumberRows().map(
@@ -56,17 +56,17 @@ export class NumberDisplayComponent {
     );
   });
 
-  highestMatchCount = computed(() => {
+  readonly highestMatchCount = computed(() => {
     const matches = this.matchesPerRow();
     return matches.length > 0 ? Math.max(...matches) : 0;
   });
 
-  rowsWithHighestMatches = computed(() => {
+  readonly rowsWithHighestMatches = computed(() => {
     const highest = this.highestMatchCount();
     return this.matchesPerRow().map((count) => count === highest && count > 0);
   });
 
-  isInputValid = computed(() => {
+  readonly isInputValid = computed(() => {
     const value = this.inputNumber();
     if (!value) return false;
 

@@ -4,7 +4,9 @@
   <div class="number-inputs">
     @for (numberInput of numberInputs(); track $index) {
     <div class="input-container">
-      <label [for]="'number-input-' + $index" class="input-label">Number {{$index + 1}}</label>
+      <label [for]="'number-input-' + $index" class="input-label"
+        >Number {{ $index + 1 }}</label
+      >
       <input
         type="number"
         min="1"

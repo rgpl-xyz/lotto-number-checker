@@ -1,0 +1,92 @@
+<p class="instruction">Search for lottery results</p>
+
+<div class="form-inputs search-bar">
+  <div class="search-controls">
+    <div class="input-group">
+      <app-game-selection [(selectedGame)]="selectedGame" />
+      <button class="search-btn" (click)="searchResults()" [disabled]="isLoading()">
+        <span class="search-icon" [class.spinning]="isLoading()">🔍</span>
+        {{ isLoading() ? 'Searching...' : (hasCachedData() ? 'Search Again' : 'Search Results') }}
+      </button>
+    </div>
+    
+    @if (hasCachedData() && lastUpdated()) {
+      <div class="cache-status">
+        <span class="cache-indicator">📊</span>
+        <span class="cache-text">
+          Last updated: {{ lastUpdated() | date : "MMM dd, yyyy HH:mm" }}
+        </span>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="results-container">
+  @if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading results...</p>
+  </div>
+  } @else if (errorMessage()) {
+  <div class="error-container">
+    <p class="error">{{ errorMessage() }}</p>
+    <button class="retry-btn" (click)="refreshResults()">
+      <span class="retry-icon">🔄</span>
+      Try Again
+    </button>
+  </div>
+  } @else if (lottoResults().length > 0) {
+  <div class="table-container">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Winning Numbers</th>
+          <th>Draw Date</th>
+          <th>Jackpot</th>
+          <th>Winners</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (result of lottoResults(); track result.game) {
+        <tr class="result-row">
+          <td class="game-name">
+            <strong>{{ result.game }}</strong>
+          </td>
+          <td class="winning-numbers">
+            <span class="number-badge">{{ result.combinations }}</span>
+          </td>
+          <td class="draw-date">
+            {{ result.drawDate | date : "MMM dd, yyyy" }}
+          </td>
+          <td class="jackpot">
+            <span class="jackpot-amount">{{ result.jackpot }}</span>
+          </td>
+          <td class="winners">
+            <span class="winners-count">{{ result.winners }}</span>
+          </td>
+          <td class="action">
+            <button
+              class="set-button"
+              (click)="setWinningNumbers(result.combinations)"
+            >
+              <span class="button-icon">🎯</span>
+              Use Numbers
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @else {
+    <div class="empty-state">
+      <p>No results found. Try searching for lottery results.</p>
+      <button class="search-btn" (click)="searchResults()">
+        <span class="search-icon">🔍</span>
+        Search Now
+      </button>
+    </div>
+  }
+</div>

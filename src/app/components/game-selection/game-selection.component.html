@@ -1,0 +1,5 @@
+<select name="select-game" id="select-game" (change)="onGameChange($event)">
+  @for (option of gameOptions(); track option.value) {
+    <option [value]="option.value">{{ option.label }}</option>
+  }
+</select>

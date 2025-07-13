@@ -2,10 +2,10 @@ import {
   Component,
   output,
   signal,
-  input,
   effect,
   model,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
@@ -15,15 +15,14 @@ import { DOCUMENT } from '@angular/common';
   imports: [],
   templateUrl: './winning-input.component.html',
   styleUrl: './winning-input.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WinningInputComponent {
-  winningNumbersSet = output<number[]>();
+  readonly winningNumbersSet = output<number[]>();
 
-  // Use model for two-way binding instead of input
-  numbersToEdit = model<number[]>([]);
+  readonly numbersToEdit = model<number[]>([]);
 
-  // Use a single writable signal for the input values
-  numberInputs = signal<(number | undefined)[]>([
+  readonly numberInputs = signal<(number | undefined)[]>([
     undefined,
     undefined,
     undefined,
@@ -32,13 +31,12 @@ export class WinningInputComponent {
     undefined,
   ]);
 
-  isValid = signal<boolean>(false);
-  hasDuplicates = signal<boolean>(false);
+  readonly isValid = signal<boolean>(false);
+  readonly hasDuplicates = signal<boolean>(false);
 
-  private document = inject(DOCUMENT);
+  private readonly document = inject(DOCUMENT);
 
   constructor() {
-    // Create an effect to watch for changes to numbersToEdit
     effect(() => {
       const numbers = this.numbersToEdit();
       if (numbers && numbers.length === 6) {
@@ -63,14 +61,13 @@ export class WinningInputComponent {
     if (!paste) return;
 
     const numbers = paste
-      .split(/[-,;\s]+/) // Support more delimiters: dash, comma, semicolon, whitespace
+      .split(/[-,;\s]+/)
       .filter((s) => s.length > 0)
       .map((s) => parseInt(s, 10))
       .filter((num) => !isNaN(num) && num >= 1 && num <= 59)
-      .slice(0, 6); // Limit to first 6 valid numbers
+      .slice(0, 6); // limit to first 6 valid numbers
 
     if (numbers.length > 0) {
-      // Get the input index from the event target
       const target = event.target as HTMLInputElement;
       const index = Array.from(target.parentElement?.children || []).indexOf(
         target
@@ -78,7 +75,7 @@ export class WinningInputComponent {
 
       const newInputs = [...this.numberInputs()];
       for (let i = 0; i < numbers.length; i++) {
-        const fillIndex = (index + i) % 6; // Start from the input where paste occurred
+        const fillIndex = (index + i) % 6; // start from the input where paste occurred
         newInputs[fillIndex] = numbers[i];
       }
       this.numberInputs.set(newInputs);
