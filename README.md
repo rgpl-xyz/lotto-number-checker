@@ -1,6 +1,6 @@
 # Lotto Number Checker
 
-An advanced Angular 19 application for checking lottery numbers against winning combinations. The application features live lottery results integration, multiple game support, and enhanced number management capabilities.
+An advanced Angular 20 application for checking lottery numbers against winning combinations. The application features live lottery results integration, multiple game support, and enhanced number management capabilities.
 
 ## ⚠️ Disclaimer
 
@@ -33,7 +33,7 @@ An advanced Angular 19 application for checking lottery numbers against winning 
 - **Smart Caching**: Caches lottery results for improved performance
 
 ### Technical Features
-- **Angular 19 Modern Features**:
+- **Angular 20 Modern Features**:
   - Signals for reactive state management
   - New control flow syntax (`@if`, `@for`, `@switch`)
   - Input/Output functions for component communication
@@ -115,7 +115,7 @@ The application supports the following Philippine lottery games:
 
 ## Development
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 19.2.12.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
 
 ### Development server
 

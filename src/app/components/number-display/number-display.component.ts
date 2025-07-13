@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+
 import {
   Component,
   computed,
@@ -6,6 +6,7 @@ import {
   input,
   output,
   inject,
+  DOCUMENT
 } from '@angular/core';
 
 @Component({

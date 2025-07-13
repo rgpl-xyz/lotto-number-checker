@@ -6,8 +6,9 @@ import {
   model,
   inject,
   ChangeDetectionStrategy,
+  DOCUMENT
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+
 
 @Component({
   selector: 'app-winning-input',
