@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, beforeEach, expect, vi } from 'vitest';
 
 import { NumberDisplayComponent } from './number-display.component';
 
@@ -32,24 +33,17 @@ describe('NumberDisplayComponent', () => {
     // Set user numbers with some matches
     component.userNumbers.set([5, 10, 15, 30, 45, 60]);
     
-    // We'll use a workaround to test functions that depend on the input signal
-    // Create a test instance method to simulate having winning numbers
-    const testWithWinningNumbers = (nums: number[]) => {
-      const origFn = component.winningNumbers;
-      // @ts-ignore - Bypass TypeScript for testing
-      component.winningNumbers = () => nums;
-      return component.matchingNumbers();
-    };
+    // Set winning numbers input using fixture
+    fixture.componentRef.setInput('winningNumbers', [10, 20, 30, 40, 50, 60]);
+    fixture.detectChanges();
     
-    // Check matching numbers with [10, 20, 30, 40, 50, 60]
-    expect(testWithWinningNumbers([10, 20, 30, 40, 50, 60])).toEqual([10, 30, 60]);
+    // Check matching numbers
+    expect(component.matchingNumbers()).toEqual([10, 30, 60]);
     
     // Test with empty winning numbers
-    expect(testWithWinningNumbers([])).toEqual([]);
-    
-    // Restore the original function
-    // @ts-ignore - Bypass TypeScript for testing
-    component.winningNumbers = origFn;
+    fixture.componentRef.setInput('winningNumbers', []);
+    fixture.detectChanges();
+    expect(component.matchingNumbers()).toEqual([]);
   });
 
   it('should organize numbers into rows of 6', () => {
@@ -97,23 +91,15 @@ describe('NumberDisplayComponent', () => {
       1, 2, 3, 4, 5, 30
     ]);
     
-    // Create test function to check with different winning numbers
-    const testWithWinningNumbers = (nums: number[]) => {
-      const origFn = component.winningNumbers;
-      // @ts-ignore - Bypass TypeScript for testing
-      component.winningNumbers = () => nums;
-      return component.matchesPerRow();
-    };
-    
-    // Check matches with [1, 2, 3, 4, 5, 6]
-    expect(testWithWinningNumbers([1, 2, 3, 4, 5, 6])).toEqual([3, 0, 5]);
+    // Set winning numbers and check matches
+    fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+    expect(component.matchesPerRow()).toEqual([3, 0, 5]);
     
     // Test with empty winning numbers
-    expect(testWithWinningNumbers([])).toEqual([]);
-    
-    // Restore original function
-    // @ts-ignore - Bypass TypeScript for testing
-    component.winningNumbers = origFn;
+    fixture.componentRef.setInput('winningNumbers', []);
+    fixture.detectChanges();
+    expect(component.matchesPerRow()).toEqual([]);
   });
 
   it('should identify the highest match count', () => {
@@ -127,32 +113,25 @@ describe('NumberDisplayComponent', () => {
       10, 11, 12, 13, 14, 15
     ]);
     
-    // Create test function
-    const testWithWinningNumbers = (nums: number[]) => {
-      const origFn = component.winningNumbers;
-      // @ts-ignore - Bypass TypeScript for testing
-      component.winningNumbers = () => nums;
-      return component.highestMatchCount();
-    };
-    
-    // Check with winning numbers [1, 2, 3, 4, 5, 6]
-    expect(testWithWinningNumbers([1, 2, 3, 4, 5, 6])).toBe(4);
+    // Set winning numbers and check highest match count
+    fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+    expect(component.highestMatchCount()).toBe(4);
     
     // Test with empty winning numbers
-    expect(testWithWinningNumbers([])).toBe(0);
-    
-    // Restore original function
-    // @ts-ignore - Bypass TypeScript for testing
-    component.winningNumbers = origFn;
+    fixture.componentRef.setInput('winningNumbers', []);
+    fixture.detectChanges();
+    expect(component.highestMatchCount()).toBe(0);
     
     // Test with no matches
     component.userNumbers.set([10, 11, 12, 13, 14, 15]);
-    // @ts-ignore - Bypass TypeScript for testing
-    component.winningNumbers = () => [1, 2, 3, 4, 5, 6];
+    fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
     expect(component.highestMatchCount()).toBe(0);
     
     // Test with empty array
     component.userNumbers.set([]);
+    fixture.detectChanges();
     expect(component.highestMatchCount()).toBe(0);
   });
 
@@ -169,24 +148,15 @@ describe('NumberDisplayComponent', () => {
       1, 2, 3, 4, 30, 31
     ]);
     
-    // Create test function
-    const testWithWinningNumbers = (nums: number[]) => {
-      const origFn = component.winningNumbers;
-      // @ts-ignore - Bypass TypeScript for testing
-      component.winningNumbers = () => nums;
-      return component.rowsWithHighestMatches();
-    };
-    
-    // Check with winning numbers [1, 2, 3, 4, 5, 6]
-    expect(testWithWinningNumbers([1, 2, 3, 4, 5, 6])).toEqual([false, true, false, true]);
+    // Set winning numbers and check rows with highest matches
+    fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
+    fixture.detectChanges();
+    expect(component.rowsWithHighestMatches()).toEqual([false, true, false, true]);
     
     // Test with no user numbers
     component.userNumbers.set([]);
-    expect(testWithWinningNumbers([1, 2, 3, 4, 5, 6])).toEqual([]);
-    
-    // Restore original function
-    // @ts-ignore - Bypass TypeScript for testing
-    component.winningNumbers = origFn;
+    fixture.detectChanges();
+    expect(component.rowsWithHighestMatches()).toEqual([]);
   });
 
   it('should validate input number', () => {
@@ -201,7 +171,7 @@ describe('NumberDisplayComponent', () => {
     component.inputNumber.set(0);
     expect(component.isInputValid()).toBe(false);
     
-    component.inputNumber.set(60);
+    component.inputNumber.set(59);
     expect(component.isInputValid()).toBe(true);  // 1-59 range
     
     component.inputNumber.set(100);
@@ -230,11 +200,11 @@ describe('NumberDisplayComponent', () => {
     component.addNumber();
     component.inputNumber.set(50);
     component.addNumber();
-    component.inputNumber.set(60);
+    component.inputNumber.set(59);
     component.addNumber();
     
     // Should have 6 numbers now
-    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 60]);
+    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 59]);
   });
 
   it('should not add duplicate numbers in the same row', () => {
@@ -249,7 +219,7 @@ describe('NumberDisplayComponent', () => {
     expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50]);
     
     // Add number to complete the row
-    component.inputNumber.set(60);
+    component.inputNumber.set(59);
     component.addNumber();
     
     // Now duplicates are allowed in a new row
@@ -257,7 +227,7 @@ describe('NumberDisplayComponent', () => {
     component.addNumber();
     
     // Now we should have 7 numbers
-    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 60, 10]);
+    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 59, 10]);
   });
 
   it('should clear all user numbers', () => {
@@ -374,8 +344,8 @@ describe('NumberDisplayComponent', () => {
     // Number should be removed
     expect(component.userNumbers()).toEqual([1, 2, 4, 5, 6, 7, 8]);
     
-    // Delete number at row 1, index 1 (the number 8)
-    component.deleteNumber(1, 1);
+    // Delete number at row 1, index 0 (the number 8)
+    component.deleteNumber(1, 0);
     
     // Number should be removed
     expect(component.userNumbers()).toEqual([1, 2, 4, 5, 6, 7]);
@@ -384,7 +354,7 @@ describe('NumberDisplayComponent', () => {
   // Note: editNumber uses window.prompt which is difficult to test properly
   // For this specific method, we'd need to mock window.prompt
   it('should handle editWinningNumbers event', () => {
-    spyOn(component.editWinningNumbers, 'emit');
+    vi.spyOn(component.editWinningNumbers, 'emit');
     
     // Trigger the event
     component.editWinningNumbers.emit();

@@ -1,14 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { of } from 'rxjs';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 import { WinningNumberComponent } from './winning-number.component';
 import { WinningInputComponent } from '../winning-input/winning-input.component';
 import { NumberDisplayComponent } from '../number-display/number-display.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
+import { LottoService } from '../../services/lotto.service';
 
 describe('WinningNumberComponent', () => {
   let component: WinningNumberComponent;
   let fixture: ComponentFixture<WinningNumberComponent>;
 
   beforeEach(async () => {
+    const mockLottoService = {
+      getLottoResults: vi.fn().mockReturnValue(of([])),
+      refreshResults: vi.fn().mockReturnValue(of([])),
+      cachedResults: signal([]),
+      isLoading: signal(false),
+      error: signal(''),
+      cacheTimestamp: signal(0),
+      hasCachedData: signal(false)
+    };
+
     await TestBed.configureTestingModule({
       imports: [
         WinningNumberComponent,
@@ -16,6 +30,9 @@ describe('WinningNumberComponent', () => {
         NumberDisplayComponent,
         SearchResultsComponent,
       ],
+      providers: [
+        { provide: LottoService, useValue: mockLottoService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WinningNumberComponent);

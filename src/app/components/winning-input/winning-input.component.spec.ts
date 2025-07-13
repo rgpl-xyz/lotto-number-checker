@@ -1,6 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 
 import { WinningInputComponent } from './winning-input.component';
+
+type MockClipboardEvent = {
+  clipboardData: {
+    getData: ReturnType<typeof vi.fn>;
+  };
+  preventDefault: ReturnType<typeof vi.fn>;
+  target: HTMLInputElement;
+};
 
 describe('WinningInputComponent', () => {
   let component: WinningInputComponent;
@@ -79,7 +88,7 @@ describe('WinningInputComponent', () => {
   });
 
   it('should submit winning numbers when valid', () => {
-    spyOn(component.winningNumbersSet, 'emit');
+    vi.spyOn(component.winningNumbersSet, 'emit');
 
     // Fill with valid numbers
     component.updateNumber(0, 10);
@@ -99,7 +108,7 @@ describe('WinningInputComponent', () => {
   });
 
   it('should not submit winning numbers when invalid', () => {
-    spyOn(component.winningNumbersSet, 'emit');
+    vi.spyOn(component.winningNumbersSet, 'emit');
 
     // Not all numbers filled
     component.updateNumber(0, 10);
@@ -113,27 +122,30 @@ describe('WinningInputComponent', () => {
   });
 
   it('should handle key down events', () => {
-    // Create a more realistic mock structure
+    // Create a mock element for the next input
     const mockElement = document.createElement('input');
     mockElement.id = 'number-input-3';
-    document.body.appendChild(mockElement);
-    spyOn(mockElement, 'focus');
+    vi.spyOn(mockElement, 'focus');
+
+    // Mock document.getElementById to return our mock element
+    vi.spyOn(document, 'getElementById').mockReturnValue(mockElement);
 
     // Enter key on a non-last input should focus next input
     const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-    spyOn(enterEvent, 'preventDefault');
+    vi.spyOn(enterEvent, 'preventDefault');
 
     component.handleKeyDown(enterEvent, 2); // Third input (index 2)
 
     expect(enterEvent.preventDefault).toHaveBeenCalled();
+    expect(document.getElementById).toHaveBeenCalledWith('number-input-3');
     expect(mockElement.focus).toHaveBeenCalled();
 
-    // Clean up
-    document.body.removeChild(mockElement);
+    // Restore the mock
+    vi.restoreAllMocks();
   });
 
   it('should submit numbers when Enter pressed on last input and valid', () => {
-    spyOn(component, 'submitWinningNumbers');
+    vi.spyOn(component, 'submitWinningNumbers');
 
     // Fill with valid numbers
     component.updateNumber(0, 10);
@@ -144,7 +156,7 @@ describe('WinningInputComponent', () => {
     component.updateNumber(5, 59);
 
     const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
-    spyOn(enterEvent, 'preventDefault');
+    vi.spyOn(enterEvent, 'preventDefault');
 
     component.handleKeyDown(enterEvent, 5); // Last input (index 5)
 
@@ -153,28 +165,22 @@ describe('WinningInputComponent', () => {
   });
 
   it('should handle paste event correctly', () => {
-    // Create mock clipboard event
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: new DataTransfer(),
-    });
-
-    // Set paste data
-    Object.defineProperty(pasteEvent.clipboardData, 'getData', {
-      value: () => '10,20,30,40,50,60',
-    });
-
-    spyOn(pasteEvent, 'preventDefault');
-
-    // Mock the target element in the paste event
-    const mockInput = document.createElement('input');
-    Object.defineProperty(pasteEvent, 'target', { value: mockInput });
-
-    // Mock the parent element lookup
+    // Create mock input element
+    const mockTarget = document.createElement('input');
     const mockParent = document.createElement('div');
-    mockParent.appendChild(mockInput);
-    Object.defineProperty(mockInput, 'parentElement', { value: mockParent });
+    mockParent.appendChild(mockTarget);
+    Object.defineProperty(mockTarget, 'parentElement', { value: mockParent });
 
-    component.parseInputString(pasteEvent);
+    // Create mock clipboard event
+    const pasteEvent: MockClipboardEvent = {
+      clipboardData: {
+        getData: vi.fn().mockReturnValue('10,20,30,40,50,60')
+      },
+      preventDefault: vi.fn(),
+      target: mockTarget
+    };
+
+    component.parseInputString(pasteEvent as unknown as ClipboardEvent);
 
     expect(pasteEvent.preventDefault).toHaveBeenCalled();
 
@@ -184,19 +190,17 @@ describe('WinningInputComponent', () => {
   });
 
   it('should reject paste with no valid numbers', () => {
-    const pasteEvent = new ClipboardEvent('paste', {
-      clipboardData: new DataTransfer(),
-    });
-
-    // Set paste data with no valid numbers
-    Object.defineProperty(pasteEvent.clipboardData, 'getData', {
-      value: () => 'abc',
-    });
-
-    spyOn(pasteEvent, 'preventDefault');
+    // Create mock clipboard event
+    const pasteEvent: MockClipboardEvent = {
+      clipboardData: {
+        getData: vi.fn().mockReturnValue('abc')
+      },
+      preventDefault: vi.fn(),
+      target: document.createElement('input')
+    };
 
     const originalInputs = [...component.numberInputs()];
-    component.parseInputString(pasteEvent);
+    component.parseInputString(pasteEvent as unknown as ClipboardEvent);
 
     expect(pasteEvent.preventDefault).toHaveBeenCalled();
     // Inputs should remain unchanged
