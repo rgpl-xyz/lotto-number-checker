@@ -6,9 +6,8 @@ import {
   model,
   inject,
   ChangeDetectionStrategy,
-  DOCUMENT
+  DOCUMENT,
 } from '@angular/core';
-
 
 @Component({
   selector: 'app-winning-input',
@@ -69,15 +68,9 @@ export class WinningInputComponent {
       .slice(0, 6); // limit to first 6 valid numbers
 
     if (numbers.length > 0) {
-      const target = event.target as HTMLInputElement;
-      const index = Array.from(target.parentElement?.children || []).indexOf(
-        target
-      );
-
       const newInputs = [...this.numberInputs()];
       for (let i = 0; i < numbers.length; i++) {
-        const fillIndex = (index + i) % 6; // start from the input where paste occurred
-        newInputs[fillIndex] = numbers[i];
+        newInputs[i] = numbers[i];
       }
       this.numberInputs.set(newInputs);
       this.validateInputs();

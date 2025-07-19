@@ -220,4 +220,24 @@ describe('WinningInputComponent', () => {
     expect(component.numberInputs()).toEqual(testNumbers);
     expect(component.isValid()).toBe(true);
   });
+
+  it('should maintain correct order when pasting numbers regardless of which input field is targeted', () => {
+    // Create mock clipboard event with winning numbers
+    const pasteEvent: MockClipboardEvent = {
+      clipboardData: {
+        getData: vi.fn().mockReturnValue('09-15-39-01-42-27')
+      },
+      preventDefault: vi.fn(),
+      target: document.createElement('input')
+    };
+
+    component.parseInputString(pasteEvent as unknown as ClipboardEvent);
+
+    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+    
+    // Numbers should be in the same order as pasted, starting from index 0
+    const expectedNumbers = [9, 15, 39, 1, 42, 27];
+    expect(component.numberInputs()).toEqual(expectedNumbers);
+    expect(component.isValid()).toBe(true);
+  });
 });
