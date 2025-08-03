@@ -6,7 +6,8 @@ import {
   input,
   output,
   inject,
-  DOCUMENT
+  DOCUMENT,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 @Component({
@@ -15,6 +16,7 @@ import {
   imports: [],
   templateUrl: './number-display.component.html',
   styleUrl: './number-display.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NumberDisplayComponent {
   readonly winningNumbers = input<number[]>([]);

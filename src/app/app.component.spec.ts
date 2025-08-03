@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, beforeEach, expect } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { AppComponent } from './app.component';
 import { RouterOutlet } from '@angular/router';
 
@@ -10,6 +11,7 @@ describe('AppComponent', () => {
         AppComponent,
         RouterOutlet
       ],
+      providers: [provideZonelessChangeDetection()]
     }).compileComponents();
   });
 
@@ -19,9 +21,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render router outlet', () => {
+  it('should render router outlet', async () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });

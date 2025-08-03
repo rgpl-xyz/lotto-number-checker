@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, beforeEach, expect } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { GameSelectionComponent } from './game-selection.component';
 
@@ -9,13 +10,14 @@ describe('GameSelectionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GameSelectionComponent]
+      imports: [GameSelectionComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(GameSelectionComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

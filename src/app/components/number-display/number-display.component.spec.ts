@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, beforeEach, expect, vi } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { NumberDisplayComponent } from './number-display.component';
 
@@ -9,13 +10,14 @@ describe('NumberDisplayComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NumberDisplayComponent]
+      imports: [NumberDisplayComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(NumberDisplayComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -29,20 +31,20 @@ describe('NumberDisplayComponent', () => {
     expect(component.editingRowIndex()).toBeNull();
   });
 
-  it('should identify matching numbers correctly', () => {
+  it('should identify matching numbers correctly', async () => {
     // Set user numbers with some matches
     component.userNumbers.set([5, 10, 15, 30, 45, 60]);
     
     // Set winning numbers input using fixture
     fixture.componentRef.setInput('winningNumbers', [10, 20, 30, 40, 50, 60]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     
     // Check matching numbers
     expect(component.matchingNumbers()).toEqual([10, 30, 60]);
     
     // Test with empty winning numbers
     fixture.componentRef.setInput('winningNumbers', []);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.matchingNumbers()).toEqual([]);
   });
 
@@ -80,7 +82,7 @@ describe('NumberDisplayComponent', () => {
     expect(rowLabels[25]).toBe('Z');
   });
 
-  it('should calculate matches per row', () => {
+  it('should calculate matches per row', async () => {
     // Set 3 rows of user numbers with different match counts
     component.userNumbers.set([
       // Row 1: 3 matches
@@ -93,16 +95,16 @@ describe('NumberDisplayComponent', () => {
     
     // Set winning numbers and check matches
     fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.matchesPerRow()).toEqual([3, 0, 5]);
     
     // Test with empty winning numbers
     fixture.componentRef.setInput('winningNumbers', []);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.matchesPerRow()).toEqual([]);
   });
 
-  it('should identify the highest match count', () => {
+  it('should identify the highest match count', async () => {
     // Set user numbers with different match counts
     component.userNumbers.set([
       // Row 1: 2 matches
@@ -115,27 +117,27 @@ describe('NumberDisplayComponent', () => {
     
     // Set winning numbers and check highest match count
     fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.highestMatchCount()).toBe(4);
     
     // Test with empty winning numbers
     fixture.componentRef.setInput('winningNumbers', []);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.highestMatchCount()).toBe(0);
     
     // Test with no matches
     component.userNumbers.set([10, 11, 12, 13, 14, 15]);
     fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.highestMatchCount()).toBe(0);
     
     // Test with empty array
     component.userNumbers.set([]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.highestMatchCount()).toBe(0);
   });
 
-  it('should identify rows with highest matches', () => {
+  it('should identify rows with highest matches', async () => {
     // Set rows with different match counts
     component.userNumbers.set([
       // Row 1: 2 matches
@@ -150,12 +152,12 @@ describe('NumberDisplayComponent', () => {
     
     // Set winning numbers and check rows with highest matches
     fixture.componentRef.setInput('winningNumbers', [1, 2, 3, 4, 5, 6]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.rowsWithHighestMatches()).toEqual([false, true, false, true]);
     
     // Test with no user numbers
     component.userNumbers.set([]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.rowsWithHighestMatches()).toEqual([]);
   });
 

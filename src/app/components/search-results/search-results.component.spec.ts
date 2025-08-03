@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, Signal } from '@angular/core';
+import { signal, Signal, provideZonelessChangeDetection } from '@angular/core';
 import { of, Observable } from 'rxjs';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 
@@ -36,14 +36,15 @@ describe('SearchResultsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [SearchResultsComponent],
       providers: [
-        { provide: LottoService, useValue: mockLottoService }
+        { provide: LottoService, useValue: mockLottoService },
+        provideZonelessChangeDetection()
       ]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(SearchResultsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

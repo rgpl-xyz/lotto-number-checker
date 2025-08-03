@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
+import { signal, provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 import { WinningNumberComponent } from './winning-number.component';
@@ -31,13 +31,14 @@ describe('WinningNumberComponent', () => {
         SearchResultsComponent,
       ],
       providers: [
-        { provide: LottoService, useValue: mockLottoService }
+        { provide: LottoService, useValue: mockLottoService },
+        provideZonelessChangeDetection()
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(WinningNumberComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
