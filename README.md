@@ -1,10 +1,10 @@
 # Lotto Number Checker
 
-An advanced Angular 20 application for checking lottery numbers against winning combinations. The application features live lottery results integration, multiple game support, and enhanced number management capabilities.
+A modern Angular 20 application for checking lottery numbers against winning combinations. Built with the latest Angular features including signals, zoneless change detection, and the new control flow syntax.
 
 ## ⚠️ Disclaimer
 
-**This application is intended for development and local environment purposes only.** It is designed as a learning project to demonstrate Angular 19 features and web scraping techniques. This application:
+**This application is intended for development and local environment purposes only.** It is designed as a learning project to demonstrate Angular 20 features and web scraping techniques. This application:
 
 - Fetches data from external sources (PCSO website) for educational purposes
 - Should not be used in production environments
@@ -18,7 +18,7 @@ An advanced Angular 20 application for checking lottery numbers against winning 
 
 ### Core Functionality
 - **Live Lottery Results Integration**: Fetches actual winning numbers from PCSO (Philippine Charity Sweepstakes Office) website
-- **Multiple Game Support**: Supports various lottery games including:
+- **Multiple Game Support**: Supports various Philippine lottery games including:
   - Ultra Lotto 6/58
   - Grand Lotto 6/55
   - Superlotto 6/49
@@ -39,9 +39,12 @@ An advanced Angular 20 application for checking lottery numbers against winning 
   - Input/Output functions for component communication
   - Standalone components architecture
   - OnPush change detection strategy
+  - Zoneless change detection for improved performance
+  - Client-side hydration support
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Error Handling**: Comprehensive error handling with retry mechanisms
 - **Loading States**: Visual feedback during data fetching
+- **Proxy Configuration**: Handles CORS issues during development
 
 ## How to Use
 
@@ -77,7 +80,7 @@ An advanced Angular 20 application for checking lottery numbers against winning 
 ## Architecture
 
 ### Components
-- **WinningNumberComponent**: Main container component
+- **WinningNumberComponent**: Main container component with signal-based state management
 - **WinningInputComponent**: Handles manual number entry with validation
 - **SearchResultsComponent**: Manages lottery result searching and display
 - **NumberDisplayComponent**: Displays and manages user number rows
@@ -85,37 +88,32 @@ An advanced Angular 20 application for checking lottery numbers against winning 
 
 ### Services
 - **LottoService**: Handles API integration with PCSO website, caching, and error management
+  - Signal-based state management for cached results, loading states, and errors
+  - Automatic caching with 5-minute expiration
+  - Comprehensive error handling with retry mechanisms
 
 ### Models
 - **LottoResult**: Interface for lottery result data
 - **GameSelectionOption**: Configuration for supported games
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Configuration
-
-### Proxy Configuration
-The application uses a proxy configuration (`proxy.conf.json`) to handle CORS issues when fetching lottery results from external APIs during development.
-
-### Supported Games
-The application supports the following Philippine lottery games:
-- Ultra Lotto 6/58 (6 numbers from 1-58)
-- Grand Lotto 6/55 (6 numbers from 1-55)
-- Superlotto 6/49 (6 numbers from 1-49)
-- Megalotto 6/45 (6 numbers from 1-45)
-- Lotto 6/42 (6 numbers from 1-42)
+### Configuration
+- **Proxy Configuration**: `proxy.conf.json` handles CORS issues when fetching from PCSO
+- **Angular Configuration**: Modern Angular 20 setup with zoneless change detection and client hydration
 
 ## Development
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.4.
+
+### Prerequisites
+
+- Node.js (version 18 or higher)
+- Angular CLI 20.1.4
+
+### Installation
+
+```bash
+npm install
+```
 
 ### Development server
 
@@ -124,6 +122,14 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 ### Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+### Running unit tests
+
+To execute unit tests with [Vitest](https://vitest.dev/), use the following command:
+
+```bash
+ng test
+```
 
 ## Code scaffolding
 
@@ -139,13 +145,24 @@ For a complete list of available schematics (such as `components`, `directives`,
 ng generate --help
 ```
 
-## Running unit tests
+## Supported Games
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+The application supports the following Philippine lottery games:
+- Ultra Lotto 6/58 (6 numbers from 1-58)
+- Grand Lotto 6/55 (6 numbers from 1-55)
+- Superlotto 6/49 (6 numbers from 1-49)
+- Megalotto 6/45 (6 numbers from 1-45)
+- Lotto 6/42 (6 numbers from 1-42)
 
-```bash
-ng test
-```
+## Technical Stack
+
+- **Framework**: Angular 20.1.4
+- **Language**: TypeScript 5.8.3
+- **Testing**: Vitest 3.2.4
+- **Styling**: SCSS
+- **State Management**: Angular Signals
+- **HTTP Client**: Angular HttpClient with fetch support
+- **Change Detection**: Zoneless change detection
 
 ## Additional Resources
 
