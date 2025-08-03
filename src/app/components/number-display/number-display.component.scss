@@ -119,8 +119,41 @@
   @extend %action-button;
 }
 
+.edit-button {
+  background: var(--primary-color);
+  color: white;
+  
+  &:hover {
+    background: var(--darker-primary-color);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+  
+  &:active {
+    background: var(--darker-primary-color);
+  }
+}
+
 .delete-button {
   @extend %btn-secondary;
+  
+  &:hover {
+    background: var(--darker-secondary-color);
+    color: white;
+  }
+  
+  &:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+  }
+  
+  &:active {
+    background: var(--darker-secondary-color);
+    color: white;
+  }
 }
 
 .done-button {
