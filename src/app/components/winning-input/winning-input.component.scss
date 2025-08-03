@@ -1,3 +1,5 @@
+@use '../../styles/shared' as *;
+
 .winning-input-container {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -31,8 +33,8 @@
   }
 
   .submit-button {
+    @extend %btn-large;
     display: block;
     margin: 0 auto;
-    padding: 12px 24px;
   }
 }

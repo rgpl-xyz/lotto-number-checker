@@ -1,3 +1,5 @@
+@use '../../styles/shared' as *;
+
 .numbers-title {
   margin-bottom: 25px;
   padding-bottom: 15px;
@@ -12,14 +14,7 @@
 }
 
 .number-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--light-gray);
-  font-weight: bold;
+  @extend %number-badge;
 
   &.winning {
     background-color: var(--winning-color);
@@ -48,5 +43,6 @@
 }
 
 .edit-button {
+  @extend %btn-base;
   margin-left: auto;
 }
