@@ -21,11 +21,14 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.14",
-    "@angular/cli": "^20.3.14",
+    "@angular/build": "^20.3.15",
+    "@angular/cli": "^20.3.15",
     "@angular/compiler-cli": "^20.3.16",
     "jsdom": "^27.4.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "1.26.0"
   }
 }
