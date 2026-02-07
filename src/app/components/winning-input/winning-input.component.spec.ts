@@ -32,75 +32,45 @@ describe('WinningInputComponent', () => {
   });
 
   it('should initialize with empty inputs and invalid status', () => {
-    expect(component.numberInputs()).toEqual([
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+    expect(component.numbers.value).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ]);
-    expect(component.isValid()).toBe(false);
+    expect(component.form.valid).toBe(false);
   });
 
   it('should update number inputs and validate', () => {
-    // Valid number
-    component.updateNumber(0, 10);
-    expect(component.numberInputs()[0]).toBe(10);
-    expect(component.isValid()).toBe(false); // Still invalid because not all numbers are filled
+    component.numbers.at(0).setValue(10);
+    expect(component.numbers.at(0).value).toBe(10);
+    expect(component.form.valid).toBe(false); // Still invalid because not all numbers are filled
 
-    // Empty string should be converted to undefined
-    component.updateNumber(0, '');
-    expect(component.numberInputs()[0]).toBeUndefined();
+    component.numbers.at(0).setValue(null);
+    expect(component.numbers.at(0).value).toBeNull();
 
-    // Fill all inputs with valid numbers
-    component.updateNumber(0, 1);
-    component.updateNumber(1, 2);
-    component.updateNumber(2, 3);
-    component.updateNumber(3, 4);
-    component.updateNumber(4, 5);
-    component.updateNumber(5, 6);
-
-    expect(component.isValid()).toBe(true);
+    component.numbers.patchValue([1, 2, 3, 4, 5, 6]);
+    expect(component.form.valid).toBe(true);
   });
 
   it('should detect duplicate numbers and mark as invalid', () => {
-    // Fill inputs with duplicates
-    component.updateNumber(0, 10);
-    component.updateNumber(1, 20);
-    component.updateNumber(2, 30);
-    component.updateNumber(3, 40);
-    component.updateNumber(4, 10); // Duplicate of index 0
-    component.updateNumber(5, 50);
-
-    expect(component.hasDuplicates()).toBe(true);
-    expect(component.isValid()).toBe(false);
+    component.numbers.patchValue([10, 20, 30, 40, 10, 50]); // Duplicate 10
+    expect(component.numbers.errors?.['duplicate']).toBe(true);
+    expect(component.form.valid).toBe(false);
   });
 
   it('should mark as invalid if numbers out of range', () => {
-    // Fill inputs with one invalid number
-    component.updateNumber(0, 10);
-    component.updateNumber(1, 20);
-    component.updateNumber(2, 30);
-    component.updateNumber(3, 40);
-    component.updateNumber(4, 60); // Above 59
-    component.updateNumber(5, 50);
-
-    expect(component.isValid()).toBe(false);
+    component.numbers.patchValue([10, 20, 30, 40, 60, 50]); // 60 above 59
+    expect(component.form.valid).toBe(false);
   });
 
   it('should submit winning numbers when valid', () => {
     vi.spyOn(component.winningNumbersSet, 'emit');
 
-    // Fill with valid numbers
-    component.updateNumber(0, 10);
-    component.updateNumber(1, 20);
-    component.updateNumber(2, 30);
-    component.updateNumber(3, 40);
-    component.updateNumber(4, 50);
-    component.updateNumber(5, 59);
-
-    expect(component.isValid()).toBe(true);
+    component.numbers.patchValue([10, 20, 30, 40, 50, 59]);
+    expect(component.form.valid).toBe(true);
 
     component.submitWinningNumbers();
 
@@ -112,11 +82,9 @@ describe('WinningInputComponent', () => {
   it('should not submit winning numbers when invalid', () => {
     vi.spyOn(component.winningNumbersSet, 'emit');
 
-    // Not all numbers filled
-    component.updateNumber(0, 10);
-    component.updateNumber(1, 20);
+    component.numbers.patchValue([10, 20, null, null, null, null]);
 
-    expect(component.isValid()).toBe(false);
+    expect(component.form.valid).toBe(false);
 
     component.submitWinningNumbers();
 
@@ -149,13 +117,7 @@ describe('WinningInputComponent', () => {
   it('should submit numbers when Enter pressed on last input and valid', () => {
     vi.spyOn(component, 'submitWinningNumbers');
 
-    // Fill with valid numbers
-    component.updateNumber(0, 10);
-    component.updateNumber(1, 20);
-    component.updateNumber(2, 30);
-    component.updateNumber(3, 40);
-    component.updateNumber(4, 50);
-    component.updateNumber(5, 59);
+    component.numbers.patchValue([10, 20, 30, 40, 50, 59]);
 
     const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
     vi.spyOn(enterEvent, 'preventDefault');
@@ -167,13 +129,11 @@ describe('WinningInputComponent', () => {
   });
 
   it('should handle paste event correctly', () => {
-    // Create mock input element
     const mockTarget = document.createElement('input');
     const mockParent = document.createElement('div');
     mockParent.appendChild(mockTarget);
     Object.defineProperty(mockTarget, 'parentElement', { value: mockParent });
 
-    // Create mock clipboard event
     const pasteEvent: MockClipboardEvent = {
       clipboardData: {
         getData: vi.fn().mockReturnValue('10,20,30,40,50,60')
@@ -186,13 +146,11 @@ describe('WinningInputComponent', () => {
 
     expect(pasteEvent.preventDefault).toHaveBeenCalled();
 
-    // Should parse 5 of the 6 numbers (60 is out of range)
-    const expectedNumbers = [10, 20, 30, 40, 50, undefined];
-    expect(component.numberInputs().slice(0, 6)).toEqual(expectedNumbers);
+    // 60 is out of range, so only 5 numbers are parsed and patched (last slot stays null)
+    expect(component.numbers.value).toEqual([10, 20, 30, 40, 50, null]);
   });
 
   it('should reject paste with no valid numbers', () => {
-    // Create mock clipboard event
     const pasteEvent: MockClipboardEvent = {
       clipboardData: {
         getData: vi.fn().mockReturnValue('abc')
@@ -201,30 +159,24 @@ describe('WinningInputComponent', () => {
       target: document.createElement('input')
     };
 
-    const originalInputs = [...component.numberInputs()];
+    const initialValues = [...component.numbers.value];
     component.parseInputString(pasteEvent as unknown as ClipboardEvent);
 
     expect(pasteEvent.preventDefault).toHaveBeenCalled();
-    // Inputs should remain unchanged
-    expect(component.numberInputs()).toEqual(originalInputs);
+    expect(component.numbers.value).toEqual(initialValues);
   });
 
   it('should support initial numbers from model input', () => {
     const testNumbers = [5, 10, 15, 20, 25, 30];
 
-    // Set the numbers via the model input
     component.numbersToEdit.set(testNumbers);
-
-    // Let the effect run
     fixture.detectChanges();
 
-    // Expect input fields to be populated
-    expect(component.numberInputs()).toEqual(testNumbers);
-    expect(component.isValid()).toBe(true);
+    expect(component.numbers.value).toEqual(testNumbers);
+    expect(component.form.valid).toBe(true);
   });
 
   it('should maintain correct order when pasting numbers regardless of which input field is targeted', () => {
-    // Create mock clipboard event with winning numbers
     const pasteEvent: MockClipboardEvent = {
       clipboardData: {
         getData: vi.fn().mockReturnValue('09-15-39-01-42-27')
@@ -236,10 +188,9 @@ describe('WinningInputComponent', () => {
     component.parseInputString(pasteEvent as unknown as ClipboardEvent);
 
     expect(pasteEvent.preventDefault).toHaveBeenCalled();
-    
-    // Numbers should be in the same order as pasted, starting from index 0
+
     const expectedNumbers = [9, 15, 39, 1, 42, 27];
-    expect(component.numberInputs()).toEqual(expectedNumbers);
-    expect(component.isValid()).toBe(true);
+    expect(component.numbers.value).toEqual(expectedNumbers);
+    expect(component.form.valid).toBe(true);
   });
 });
