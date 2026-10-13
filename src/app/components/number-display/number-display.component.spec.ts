@@ -353,6 +353,28 @@ describe('NumberDisplayComponent', () => {
     expect(component.userNumbers()).toEqual([1, 2, 4, 5, 6, 7]);
   });
 
+  it('clears the entry field after a two-digit number pasted in one go is added', async () => {
+    const field: HTMLInputElement = fixture.nativeElement.querySelector('#number-input');
+    field.value = '17';
+    field.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    expect(component.userNumbers()).toEqual([17]);
+    expect(field.value).toBe('');
+  });
+
+  it('clears the entry field after a number is added with Enter', async () => {
+    const field: HTMLInputElement = fixture.nativeElement.querySelector('#number-input');
+    field.value = '5';
+    field.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    await fixture.whenStable();
+
+    expect(component.userNumbers()).toEqual([5]);
+    expect(field.value).toBe('');
+  });
+
   // Note: editNumber uses window.prompt which is difficult to test properly
   // For this specific method, we'd need to mock window.prompt
   it('should handle editWinningNumbers event', () => {

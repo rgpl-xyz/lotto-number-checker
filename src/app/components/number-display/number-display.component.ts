@@ -7,7 +7,9 @@ import {
   output,
   inject,
   DOCUMENT,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  ElementRef,
+  viewChild
 } from '@angular/core';
 
 @Component({
@@ -25,6 +27,7 @@ export class NumberDisplayComponent {
   readonly editingRowIndex = signal<number | null>(null);
 
   private readonly document = inject(DOCUMENT);
+  private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput');
 
   matchingNumbers = computed(() => {
     if (!this.winningNumbers().length) return [];
@@ -107,6 +110,10 @@ export class NumberDisplayComponent {
       }
 
       this.inputNumber.set(undefined);
+      // [value] only writes to the field when its value changes between checks. A number pasted in one go goes
+      // undefined -> 17 -> undefined within one event, so the binding never sees a change: clear the field here.
+      const field = this.numberInput()?.nativeElement;
+      if (field) field.value = '';
     }
   }
 
