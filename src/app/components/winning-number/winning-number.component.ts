@@ -1,7 +1,8 @@
-import { Component, signal, model, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, model, inject, ChangeDetectionStrategy } from '@angular/core';
 import { WinningInputComponent } from '../winning-input/winning-input.component';
 import { NumberDisplayComponent } from '../number-display/number-display.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
+import { FEATURE_FLAGS } from '../../feature-flags';
 
 @Component({
   selector: 'app-winning-number',
@@ -12,6 +13,7 @@ import { SearchResultsComponent } from '../search-results/search-results.compone
 })
 export class WinningNumberComponent {
   readonly title = signal<string>('Lotto Number Matcher');
+  readonly liveResults = inject(FEATURE_FLAGS).liveResults;
   readonly useSearch = model<boolean>(false);
   readonly winningNumbers = model<number[]>([]);
   readonly isEditMode = signal<boolean>(true);

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, Signal, provideZonelessChangeDetection } from '@angular/core';
+import { signal, Signal, WritableSignal, provideZonelessChangeDetection } from '@angular/core';
 import { of, Observable } from 'rxjs';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 
@@ -49,5 +49,22 @@ describe('SearchResultsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the fetch error with a retry button instead of results', async () => {
+    (mockLottoService.error as WritableSignal<string>).set(
+      'Unable to fetch lottery results at this time. Please try again later.'
+    );
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+
+    expect(element.querySelector('.error')?.textContent).toContain(
+      'Unable to fetch lottery results'
+    );
+    expect(element.querySelector('.results-table')).toBeNull();
+
+    element.querySelector<HTMLButtonElement>('.retry-btn')?.click();
+
+    expect(mockLottoService.refreshResults).toHaveBeenCalled();
   });
 });

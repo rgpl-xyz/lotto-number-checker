@@ -4,20 +4,37 @@ A modern Angular 22 application for checking lottery numbers against winning com
 
 ## ⚠️ Disclaimer
 
-**This application is intended for development and local environment purposes only.** It is designed as a learning project to demonstrate modern Angular features and web scraping techniques. This application:
+This is a learning project that demonstrates modern Angular features. It:
 
-- Fetches data from external sources (PCSO website) for educational purposes
-- Should not be used in production environments
 - Is not affiliated with or endorsed by PCSO
-- May be subject to changes in external API/website structures
-- Users should verify all lottery results through official PCSO channels
+- Fetches live results from the PCSO website only in local development, behind the `liveResults` flag (see [Live results flag](#live-results-flag)); the deployed build never contacts PCSO
+- May stop parsing live results whenever the PCSO website changes or refuses the request
 
 **Please use official PCSO channels for actual lottery number verification and results.**
+
+## Live results flag
+
+The number checker works with no network access: enter the winning numbers by hand, then check your rows against them. Fetching live results from PCSO is a local-development feature, controlled by a build-time flag:
+
+| Command | Build configuration | `liveResults` | "Use Search Results" toggle |
+|---|---|---|---|
+| `ng serve` | development | `true` | shown |
+| `ng build` | production | `false` | hidden |
+| `ng test` | production (set explicitly in `angular.json`) | `false` | tests override it to cover both values |
+
+- The flag is defined in `src/environments/environment.ts` (production) and `src/environments/environment.development.ts` (development). `fileReplacements` in `angular.json` swaps in the development file for `ng serve`.
+- Components read it through the `FEATURE_FLAGS` injection token in `src/app/feature-flags.ts`, so tests can provide either value.
+- Live results need `proxy.conf.json`, which only the dev server applies. A production build has no proxy, which is why the flag is off there.
+- With the flag off, the search UI is never rendered and `LottoService` is never created, so the deployed app makes no requests to PCSO.
+- With the flag on, a failed fetch (for example PCSO answering 403) shows an error with a "Try Again" button; manual entry keeps working.
+- To try the production behaviour locally, run `ng serve --configuration production`.
+
+As of October 2026 the PCSO website refuses requests from the dev-server proxy with `403 Access Denied`, so with the flag on you will most likely see the error state.
 
 ## Features
 
 ### Core Functionality
-- **Live Lottery Results Integration**: Fetches actual winning numbers from PCSO (Philippine Charity Sweepstakes Office) website
+- **Live Lottery Results (local development only)**: Fetches actual winning numbers from the PCSO (Philippine Charity Sweepstakes Office) website when the `liveResults` flag is on
 - **Multiple Game Support**: Supports various Philippine lottery games including:
   - Ultra Lotto 6/58
   - Grand Lotto 6/55
@@ -43,14 +60,14 @@ A modern Angular 22 application for checking lottery numbers against winning com
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Error Handling**: Comprehensive error handling with retry mechanisms
 - **Loading States**: Visual feedback during data fetching
-- **Proxy Configuration**: Handles CORS issues during development
+- **Proxy Configuration**: Handles CORS for live results during local development
 
 ## How to Use
 
 ### Setting Up Winning Numbers
 
 1. **Manual Entry**: Enter 6 numbers manually in the "Winning Numbers" section (values between 1-59)
-2. **Search Results**: Toggle "Use Search Results" to fetch actual lottery results:
+2. **Search Results** (local development only, `liveResults` flag on): Toggle "Use Search Results" to fetch actual lottery results:
    - Select a lottery game from the dropdown
    - Click "Search Results" to fetch recent draws
    - Click "Use Numbers" on any result to set them as winning numbers
@@ -69,9 +86,9 @@ A modern Angular 22 application for checking lottery numbers against winning com
    - Delete entire rows
    - Track multiple number combinations
 
-### Search Functionality
+### Search Functionality (local development only)
 
-- **Live Results**: Fetches recent lottery results from official PCSO website
+- **Live Results**: Fetches recent lottery results from the official PCSO website through the dev-server proxy
 - **Game Selection**: Filter results by specific lottery games
 - **Quick Setup**: Use actual winning numbers from past draws
 - **Cache Management**: Results are cached for 5 minutes to improve performance
@@ -96,7 +113,8 @@ A modern Angular 22 application for checking lottery numbers against winning com
 - **GameSelectionOption**: Configuration for supported games
 
 ### Configuration
-- **Proxy Configuration**: `proxy.conf.json` handles CORS issues when fetching from PCSO
+- **Feature Flags**: `FEATURE_FLAGS` (`src/app/feature-flags.ts`) reads the build-time values in `src/environments/`
+- **Proxy Configuration**: `proxy.conf.json` handles CORS when `ng serve` fetches from PCSO
 - **Angular Configuration**: Angular 22 setup with zoneless change detection
 
 ## Development

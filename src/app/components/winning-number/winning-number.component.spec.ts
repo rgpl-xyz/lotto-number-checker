@@ -7,6 +7,7 @@ import { WinningInputComponent } from '../winning-input/winning-input.component'
 import { NumberDisplayComponent } from '../number-display/number-display.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
 import { LottoService } from '../../services/lotto.service';
+import { FEATURE_FLAGS, FeatureFlags } from '../../feature-flags';
 
 describe('WinningNumberComponent', () => {
   let component: WinningNumberComponent;
@@ -82,5 +83,66 @@ describe('WinningNumberComponent', () => {
 
     component.useSearch.set(false);
     expect(component.useSearch()).toBe(false);
+  });
+});
+
+describe('WinningNumberComponent live results flag', () => {
+  async function render(flags: FeatureFlags) {
+    const lottoService = {
+      getLottoResults: vi.fn().mockReturnValue(of([])),
+      refreshResults: vi.fn().mockReturnValue(of([])),
+      cachedResults: signal([]),
+      isLoading: signal(false),
+      error: signal(''),
+      cacheTimestamp: signal(0),
+      hasCachedData: signal(false)
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [WinningNumberComponent],
+      providers: [
+        { provide: LottoService, useValue: lottoService },
+        { provide: FEATURE_FLAGS, useValue: flags },
+        provideZonelessChangeDetection()
+      ]
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(WinningNumberComponent);
+    await fixture.whenStable();
+    const element: HTMLElement = fixture.nativeElement;
+    return { fixture, element, lottoService };
+  }
+
+  it('hides the search toggle and never fetches when live results are off', async () => {
+    const { fixture, element, lottoService } = await render({ liveResults: false });
+
+    fixture.componentInstance.useSearch.set(true);
+    await fixture.whenStable();
+
+    expect(element.querySelector('#use-search')).toBeNull();
+    expect(element.querySelector('app-search-results')).toBeNull();
+    expect(element.querySelector('app-winning-input')).not.toBeNull();
+    expect(lottoService.getLottoResults).not.toHaveBeenCalled();
+  });
+
+  it('shows the search toggle, unchecked, when live results are on', async () => {
+    const { element, lottoService } = await render({ liveResults: true });
+
+    const toggle = element.querySelector<HTMLInputElement>('#use-search');
+    expect(toggle).not.toBeNull();
+    expect(toggle?.checked).toBe(false);
+    expect(element.querySelector('app-search-results')).toBeNull();
+    expect(lottoService.getLottoResults).not.toHaveBeenCalled();
+  });
+
+  it('loads search results once the toggle is checked', async () => {
+    const { fixture, element, lottoService } = await render({ liveResults: true });
+
+    element.querySelector<HTMLInputElement>('#use-search')?.click();
+    await fixture.whenStable();
+
+    expect(element.querySelector('app-search-results')).not.toBeNull();
+    expect(element.querySelector('app-winning-input')).not.toBeNull();
+    expect(lottoService.getLottoResults).toHaveBeenCalled();
   });
 });

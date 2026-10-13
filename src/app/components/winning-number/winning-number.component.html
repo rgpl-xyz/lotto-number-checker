@@ -5,6 +5,7 @@
     @if (isEditMode()) {
     <h2 class="numbers-title">Enter Winning Numbers</h2>
 
+    @if (liveResults) {
     <span class="search">
       <input type="checkbox" name="use-search" id="use-search" [checked]="useSearch()" (change)="useSearch.set($any($event.target).checked)" />
       <label for="use-search"> Use Search Results </label>
@@ -12,6 +13,7 @@
 
     @if (useSearch()) {
       <app-search-results (winningNumbersSet)="setWinningNumbers($event)" />
+    }
     }
 
     <app-winning-input

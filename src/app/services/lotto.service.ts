@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, map, catchError, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, EMPTY, of, map, catchError, finalize, tap } from 'rxjs';
 import { signal, computed } from '@angular/core';
 import { GAME_SELECTION_OPTIONS, LottoResult } from '../models/lotto.model';
 
@@ -56,31 +56,8 @@ export class LottoService {
     this._isLoading.set(true);
     this._error.set('');
 
-    const headers = new HttpHeaders({
-      'User-Agent':
-        'Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0',
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Accept-Encoding': 'gzip, deflate, br, zstd',
-      Origin: 'https://www.pcso.gov.ph',
-      DNT: '1',
-      'Sec-GPC': '1',
-      Connection: 'keep-alive',
-      Referer: 'https://www.pcso.gov.ph/SearchLottoResult.aspx',
-      'Upgrade-Insecure-Requests': '1',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'same-origin',
-      'Sec-Fetch-User': '?1',
-      Priority: 'u=0, i',
-    });
-
     return this.http
-      .get(this.baseUrl, {
-        headers,
-        responseType: 'text',
-        withCredentials: true,
-      })
+      .get(this.baseUrl, { responseType: 'text' })
       .pipe(
         map((html) => {
           if (html.includes('Runtime Error') || html.includes('Server Error')) {
@@ -96,18 +73,18 @@ export class LottoService {
           // Cache the results
           this._cachedResults.set(results);
           this._cacheTimestamp.set(Date.now());
-          this._isLoading.set(false);
         }),
         catchError((error) => {
+          // The failure reaches the UI through the error signal, so callers
+          // don't need an error handler of their own.
           console.error('Error fetching lotto results:', error);
           this._error.set(
             'Unable to fetch lottery results at this time. Please try again later.'
           );
-          this._isLoading.set(false);
-          throw new Error(
-            'Unable to fetch lottery results at this time. Please try again later.'
-          );
-        })
+          return EMPTY;
+        }),
+        // Also runs when the caller unsubscribes mid-request (e.g. the search panel closes).
+        finalize(() => this._isLoading.set(false))
       );
   }
 
