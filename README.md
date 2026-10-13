@@ -140,6 +140,10 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+### Deployment
+
+The production build runs at https://lotto.app.rgpl.xyz, served as static files by nginx on a VPS. CI (`.github/workflows/ci.yml`) tests and builds every push; deploys are manual, see [deploy/README.md](deploy/README.md).
+
 ### Running unit tests
 
 To execute unit tests with [Vitest](https://vitest.dev/), use the following command:
