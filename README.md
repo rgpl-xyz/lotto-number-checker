@@ -1,10 +1,10 @@
 # Lotto Number Checker
 
-A modern Angular 20 application for checking lottery numbers against winning combinations. Built with the latest Angular features including signals, zoneless change detection, and the new control flow syntax.
+A modern Angular 22 application for checking lottery numbers against winning combinations. Built with the latest Angular features including signals, zoneless change detection, and the new control flow syntax.
 
 ## ⚠️ Disclaimer
 
-**This application is intended for development and local environment purposes only.** It is designed as a learning project to demonstrate Angular 20 features and web scraping techniques. This application:
+**This application is intended for development and local environment purposes only.** It is designed as a learning project to demonstrate modern Angular features and web scraping techniques. This application:
 
 - Fetches data from external sources (PCSO website) for educational purposes
 - Should not be used in production environments
@@ -33,14 +33,13 @@ A modern Angular 20 application for checking lottery numbers against winning com
 - **Smart Caching**: Caches lottery results for improved performance
 
 ### Technical Features
-- **Angular 20 Modern Features**:
+- **Modern Angular Features**:
   - Signals for reactive state management
   - New control flow syntax (`@if`, `@for`, `@switch`)
   - Input/Output functions for component communication
   - Standalone components architecture
   - OnPush change detection strategy
   - Zoneless change detection for improved performance
-  - Client-side hydration support
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Error Handling**: Comprehensive error handling with retry mechanisms
 - **Loading States**: Visual feedback during data fetching
@@ -98,16 +97,16 @@ A modern Angular 20 application for checking lottery numbers against winning com
 
 ### Configuration
 - **Proxy Configuration**: `proxy.conf.json` handles CORS issues when fetching from PCSO
-- **Angular Configuration**: Modern Angular 20 setup with zoneless change detection and client hydration
+- **Angular Configuration**: Angular 22 setup with zoneless change detection
 
 ## Development
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.4.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 20.1.4 and has since been updated to 22.
 
 ### Prerequisites
 
-- Node.js (version 18 or higher)
-- Angular CLI 20.1.4
+- Node.js in Angular 22's supported range (`^22.22.3`, `^24.15.0` or `>=26`); `.nvmrc` pins the version this project uses
+- Angular CLI 22 (installed locally; use `npx ng` or the npm scripts)
 
 ### Installation
 
@@ -156,9 +155,9 @@ The application supports the following Philippine lottery games:
 
 ## Technical Stack
 
-- **Framework**: Angular 20.1.4
-- **Language**: TypeScript 5.8.3
-- **Testing**: Vitest 3.2.4
+- **Framework**: Angular 22.2
+- **Language**: TypeScript 6.0
+- **Testing**: Vitest 5
 - **Styling**: SCSS
 - **State Management**: Angular Signals
 - **HTTP Client**: Angular HttpClient with fetch support
@@ -170,4 +169,4 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
