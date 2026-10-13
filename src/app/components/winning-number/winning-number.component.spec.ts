@@ -47,7 +47,7 @@ describe('WinningNumberComponent', () => {
   });
 
   it('should have default values', () => {
-    expect(component.title()).toBe('Lotto Number Matcher');
+    expect(component.title()).toBe('Lotto Number Checker');
     expect(component.winningNumbers()).toEqual([]);
     expect(component.isEditMode()).toBe(true);
   });

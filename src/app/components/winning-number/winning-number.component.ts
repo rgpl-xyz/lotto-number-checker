@@ -12,7 +12,7 @@ import { FEATURE_FLAGS } from '../../feature-flags';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WinningNumberComponent {
-  readonly title = signal<string>('Lotto Number Matcher');
+  readonly title = signal<string>('Lotto Number Checker');
   readonly liveResults = inject(FEATURE_FLAGS).liveResults;
   readonly useSearch = model<boolean>(false);
   readonly winningNumbers = model<number[]>([]);
