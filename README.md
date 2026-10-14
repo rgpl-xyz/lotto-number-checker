@@ -21,8 +21,11 @@ npm start    # http://localhost:4200
 
 ```bash
 npx ng test --watch=false   # unit tests, Vitest
+npm run e2e                 # Playwright; run `npx playwright install chromium` once first
 npx ng build                # dist/lotto/browser
 ```
+
+The e2e tests run against `ng serve`. Set `E2E_BASE_URL` to test a running build instead, which is what CI does with the production build behind the nginx config in `deploy/nginx/`. A test fails if the page requests anything from another site or logs an error or warning.
 
 ## Live results (local only)
 
@@ -38,7 +41,7 @@ Since October 2026 pcso.gov.ph answers the proxy with 403, so expect the error m
 
 ## Deploying
 
-Static build served by nginx on the rgpl VPS. CI runs the tests and the build on every push. Deploys are manual: [deploy/README.md](deploy/README.md).
+Static build served by nginx on the rgpl VPS. CI runs the unit tests, the build and the e2e tests against that build on every push. Deploys are manual: [deploy/README.md](deploy/README.md).
 
 ## License
 

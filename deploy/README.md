@@ -1,6 +1,6 @@
 # Deploying lotto.app.rgpl.xyz
 
-The site is the production build (`ng build`, `liveResults` off) served as static files by nginx on the rgpl VPS (`ssh rgpl`). CI only tests and builds; deploys are run by hand.
+The site is the production build (`ng build`, `liveResults` off) served as static files by nginx on the rgpl VPS (`ssh rgpl`). CI runs the tests and the build, then the e2e tests against the build under `nginx/lotto.conf`. Deploys are run by hand.
 
 | Path on the VPS | What it is |
 |---|---|
@@ -53,4 +53,5 @@ ssh rgpl 'cd /var/www/lotto && ln -sfn releases/<commit> current.next && mv -Tf 
 curl -sI https://lotto.app.rgpl.xyz/ | grep -iE '^(HTTP|content-security-policy|strict-transport-security|cache-control)'
 curl -so /dev/null -w '%{http_code}\n' https://lotto.app.rgpl.xyz/missing           # 404
 curl -so /dev/null -w '%{http_code} %{redirect_url}\n' http://lotto.app.rgpl.xyz/   # 301 to https
+E2E_BASE_URL=https://lotto.app.rgpl.xyz npm run e2e                                 # the e2e tests, against the live site
 ```
