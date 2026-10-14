@@ -1,37 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, provideZonelessChangeDetection } from '@angular/core';
-import { of } from 'rxjs';
-import { vi, describe, it, expect } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect } from 'vitest';
 import { WinningNumberComponent } from './winning-number.component';
-import { LottoService } from '../../services/lotto.service';
 import { FEATURE_FLAGS, FeatureFlags } from '../../feature-flags';
-import { LottoResult } from '../../models/lotto.model';
-import { toDraw } from '../../lotto/draw';
-
-const RESULT: LottoResult = {
-  game: 'Ultra Lotto 6/58',
-  combinations: '05-12-23-34-45-56',
-  draw: toDraw([5, 12, 23, 34, 45, 56]),
-  drawDate: new Date('10/12/2026'),
-  jackpot: '49,500,000.00',
-  winners: '0',
-};
+import { ResultsSource } from '../../results/results-source';
+import {
+  InMemoryResultsSource,
+  ULTRA_LOTTO_RESULT,
+} from '../../../testing/in-memory-results-source';
 
 async function render(flags: FeatureFlags = { liveResults: false }) {
-  const lottoService = {
-    getLottoResults: vi.fn().mockReturnValue(of([RESULT])),
-    refreshResults: vi.fn().mockReturnValue(of([RESULT])),
-    cachedResults: signal([RESULT]),
-    isLoading: signal(false),
-    error: signal(''),
-    cacheTimestamp: signal(0),
-    hasCachedData: signal(true)
-  };
+  const source = new InMemoryResultsSource();
 
   await TestBed.configureTestingModule({
     imports: [WinningNumberComponent],
     providers: [
-      { provide: LottoService, useValue: lottoService },
+      { provide: ResultsSource, useValue: source },
       { provide: FEATURE_FLAGS, useValue: flags },
       provideZonelessChangeDetection()
     ]
@@ -40,7 +24,7 @@ async function render(flags: FeatureFlags = { liveResults: false }) {
   const fixture = TestBed.createComponent(WinningNumberComponent);
   await fixture.whenStable();
   const element: HTMLElement = fixture.nativeElement;
-  return { fixture, element, lottoService };
+  return { fixture, element, source };
 }
 
 const winningField = (element: HTMLElement, index: number) =>
@@ -88,7 +72,7 @@ describe('WinningNumberComponent', () => {
 
 describe('WinningNumberComponent live results flag', () => {
   it('hides the search toggle and never fetches when live results are off', async () => {
-    const { fixture, element, lottoService } = await render({ liveResults: false });
+    const { fixture, element, source } = await render({ liveResults: false });
 
     fixture.componentInstance.useSearch.set(true);
     await fixture.whenStable();
@@ -96,34 +80,36 @@ describe('WinningNumberComponent live results flag', () => {
     expect(element.querySelector('#use-search')).toBeNull();
     expect(element.querySelector('app-search-results')).toBeNull();
     expect(element.querySelector('app-winning-input')).not.toBeNull();
-    expect(lottoService.getLottoResults).not.toHaveBeenCalled();
+    expect(source.requests).toBe(0);
   });
 
   it('shows the search toggle, unchecked, when live results are on', async () => {
-    const { element, lottoService } = await render({ liveResults: true });
+    const { element, source } = await render({ liveResults: true });
 
     const toggle = element.querySelector<HTMLInputElement>('#use-search');
     expect(toggle).not.toBeNull();
     expect(toggle?.checked).toBe(false);
     expect(element.querySelector('app-search-results')).toBeNull();
-    expect(lottoService.getLottoResults).not.toHaveBeenCalled();
+    expect(source.requests).toBe(0);
   });
 
   it('loads search results once the toggle is checked', async () => {
-    const { fixture, element, lottoService } = await render({ liveResults: true });
+    const { fixture, element, source } = await render({ liveResults: true });
 
     element.querySelector<HTMLInputElement>('#use-search')?.click();
     await fixture.whenStable();
 
     expect(element.querySelector('app-search-results')).not.toBeNull();
     expect(element.querySelector('app-winning-input')).not.toBeNull();
-    expect(lottoService.getLottoResults).toHaveBeenCalled();
+    expect(source.requests).toBe(1);
   });
 
   it('uses a search result as the winning numbers', async () => {
-    const { fixture, element } = await render({ liveResults: true });
+    const { fixture, element, source } = await render({ liveResults: true });
 
     element.querySelector<HTMLInputElement>('#use-search')?.click();
+    await fixture.whenStable();
+    source.succeed([ULTRA_LOTTO_RESULT]);
     await fixture.whenStable();
     element.querySelector<HTMLButtonElement>('.set-button')!.click();
     await fixture.whenStable();

@@ -4,15 +4,15 @@
   <div class="search-controls">
     <div class="input-group">
       <app-game-selection [(selectedGame)]="selectedGame" />
-      <button class="search-btn" (click)="searchResults()" [disabled]="isLoading()">
-        <span class="search-icon" [class.spinning]="isLoading()">🔍</span>
-        {{ isLoading() ? 'Searching...' : (hasCachedData() ? 'Search Again' : 'Search Results') }}
+      <button class="search-btn" (click)="search()" [disabled]="isLoading()">
+        <span class="search-icon" [class.spinning]="isLoading()" aria-hidden="true">🔍</span>
+        {{ isLoading() ? 'Searching...' : (results().length > 0 ? 'Search Again' : 'Search Results') }}
       </button>
     </div>
-    
-    @if (hasCachedData() && lastUpdated()) {
+
+    @if (results().length > 0 && lastUpdated()) {
       <div class="cache-status">
-        <span class="cache-indicator">📊</span>
+        <span class="cache-indicator" aria-hidden="true">📊</span>
         <span class="cache-text">
           Last updated: {{ lastUpdated() | date : "MMM dd, yyyy HH:mm" }}
         </span>
@@ -21,21 +21,25 @@
   </div>
 </div>
 
+<p class="visually-hidden" role="status">{{ status() }}</p>
+
 <div class="results-container">
   @if (isLoading()) {
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>Loading results...</p>
   </div>
-  } @else if (errorMessage()) {
+  } @else {
+  @if (errorMessage()) {
   <div class="error-container">
-    <p class="error">{{ errorMessage() }}</p>
-    <button class="retry-btn" (click)="refreshResults()">
-      <span class="retry-icon">🔄</span>
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+    <button class="retry-btn" (click)="search()">
+      <span class="retry-icon" aria-hidden="true">🔄</span>
       Try Again
     </button>
   </div>
-  } @else if (lottoResults().length > 0) {
+  }
+  @if (shownResults().length > 0) {
   <div class="table-container">
     <table class="results-table">
       <thead>
@@ -49,7 +53,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (result of lottoResults(); track result.game) {
+        @for (result of shownResults(); track $index) {
         <tr class="result-row">
           <td class="game-name">
             <strong>{{ result.game }}</strong>
@@ -67,27 +71,36 @@
             <span class="winners-count">{{ result.winners }}</span>
           </td>
           <td class="action">
+            @if (result.draw) {
             <button
               class="set-button"
-              [disabled]="!result.draw"
+              [attr.aria-label]="'Use Numbers, ' + result.game + ', ' + (result.drawDate | date : 'MMM d, yyyy')"
               (click)="setWinningNumbers(result)"
             >
-              <span class="button-icon">🎯</span>
+              <span class="button-icon" aria-hidden="true">🎯</span>
               Use Numbers
             </button>
+            } @else {
+            <span class="unreadable">Numbers unreadable</span>
+            }
           </td>
         </tr>
         }
       </tbody>
     </table>
   </div>
-  } @else {
+  } @else if (results().length > 0) {
+    <div class="empty-state">
+      <p>No recent results for {{ selectedGame()?.name }}.</p>
+    </div>
+  } @else if (!errorMessage()) {
     <div class="empty-state">
       <p>No results found. Try searching for lottery results.</p>
-      <button class="search-btn" (click)="searchResults()">
-        <span class="search-icon">🔍</span>
+      <button class="search-btn" (click)="search()">
+        <span class="search-icon" aria-hidden="true">🔍</span>
         Search Now
       </button>
     </div>
+  }
   }
 </div>

@@ -6,20 +6,18 @@ import {
   output,
   signal,
   OnInit,
-  DestroyRef,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { GameSelectionComponent } from '../game-selection/game-selection.component';
-import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { LottoService } from '../../services/lotto.service';
-import { LottoResult } from '../../models/lotto.model';
+import { GameSelectionComponent } from '../game-selection/game-selection.component';
+import { LottoResult } from '../../results/lotto-result';
 import { LottoGame } from '../../lotto/games';
 import { Draw } from '../../lotto/draw';
+import { RecentResults } from '../../results/recent-results';
 
+/** Recent PCSO results, filtered by game, any of which can become the winning numbers. */
 @Component({
   selector: 'app-search-results',
-  imports: [FormsModule, GameSelectionComponent, DatePipe],
+  imports: [GameSelectionComponent, DatePipe],
   templateUrl: './search-results.component.html',
   styleUrl: './search-results.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,50 +25,45 @@ import { Draw } from '../../lotto/draw';
 export class SearchResultsComponent implements OnInit {
   readonly winningNumbersSet = output<Draw>();
 
-  readonly selectedGame = signal<LottoGame | null>(null);
+  /** The game to list results for, or null for every game. */
+  protected readonly selectedGame = signal<LottoGame | null>(null);
 
-  readonly lottoService = inject(LottoService);
+  private readonly recent = inject(RecentResults);
 
-  readonly lottoResults = this.lottoService.cachedResults;
-  readonly isLoading = this.lottoService.isLoading;
-  readonly errorMessage = this.lottoService.error;
+  protected readonly results = this.recent.results;
+  protected readonly isLoading = this.recent.loading;
+  protected readonly errorMessage = this.recent.error;
+  protected readonly lastUpdated = this.recent.fetchedAt;
 
-  readonly lastUpdated = computed(() => {
-    const timestamp = this.lottoService.cacheTimestamp();
-    return timestamp ? new Date(timestamp) : null;
+  protected readonly shownResults = computed(() => {
+    const game = this.selectedGame();
+    return game ? this.results().filter((result) => result.game === game.name) : this.results();
   });
 
-  readonly hasCachedData = this.lottoService.hasCachedData;
-
-  private readonly destroyRef = inject(DestroyRef);
+  /** One short line for screen readers about what the panel shows. */
+  protected readonly status = computed(() => {
+    if (this.isLoading()) {
+      return 'Loading results…';
+    }
+    const shown = this.shownResults().length;
+    if (shown > 0) {
+      return shown === 1 ? '1 result' : `${shown} results`;
+    }
+    if (this.results().length > 0) {
+      return `No recent results for ${this.selectedGame()?.name}.`;
+    }
+    return this.errorMessage() ? '' : 'No results found.';
+  });
 
   ngOnInit(): void {
-    this.loadResults();
+    this.recent.load();
   }
 
-  searchResults(): void {
-    const forceRefresh = this.hasCachedData();
-    this.lottoService
-      .getLottoResults(forceRefresh)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+  protected search(): void {
+    this.recent.refresh();
   }
 
-  loadResults(): void {
-    this.lottoService
-      .getLottoResults()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
-  }
-
-  refreshResults(): void {
-    this.lottoService
-      .refreshResults()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
-  }
-
-  setWinningNumbers(result: LottoResult): void {
+  protected setWinningNumbers(result: LottoResult): void {
     if (result.draw) {
       this.winningNumbersSet.emit(result.draw);
     }

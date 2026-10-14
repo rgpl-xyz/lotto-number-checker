@@ -1,100 +1,156 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, Signal, WritableSignal, provideZonelessChangeDetection } from '@angular/core';
-import { of, Observable } from 'rxjs';
-import { vi, describe, it, beforeEach, expect } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 
 import { SearchResultsComponent } from './search-results.component';
-import { LottoService } from '../../services/lotto.service';
-import { LottoResult } from '../../models/lotto.model';
-import { Draw, toDraw } from '../../lotto/draw';
-
-const RESULT: LottoResult = {
-  game: 'Ultra Lotto 6/58',
-  combinations: '05-12-23-34-45-56',
-  draw: toDraw([5, 12, 23, 34, 45, 56]),
-  drawDate: new Date('10/12/2026'),
-  jackpot: '49,500,000.00',
-  winners: '0',
-};
-
-type MockLottoService = {
-  getLottoResults: ReturnType<typeof vi.fn>;
-  refreshResults: ReturnType<typeof vi.fn>;
-  cachedResults: Signal<LottoResult[]>;
-  isLoading: Signal<boolean>;
-  error: Signal<string>;
-  cacheTimestamp: Signal<number>;
-  hasCachedData: Signal<boolean>;
-};
+import { ResultsSource } from '../../results/results-source';
+import { Draw } from '../../lotto/draw';
+import {
+  InMemoryResultsSource,
+  MEGALOTTO_RESULT,
+  ULTRA_LOTTO_RESULT,
+} from '../../../testing/in-memory-results-source';
 
 describe('SearchResultsComponent', () => {
-  let component: SearchResultsComponent;
   let fixture: ComponentFixture<SearchResultsComponent>;
-  let mockLottoService: MockLottoService;
+  let element: HTMLElement;
+  let source: InMemoryResultsSource;
+  let setDraws: Draw[];
+
+  const shownGames = () =>
+    Array.from(element.querySelectorAll('.result-row .game-name')).map((cell) =>
+      cell.textContent?.trim()
+    );
+
+  async function answer(act: () => void): Promise<void> {
+    act();
+    await fixture.whenStable();
+  }
+
+  async function chooseGame(name: string): Promise<void> {
+    const select = element.querySelector<HTMLSelectElement>('select')!;
+    select.value = name;
+    select.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+  }
 
   beforeEach(async () => {
-    mockLottoService = {
-      getLottoResults: vi.fn().mockReturnValue(of([])),
-      refreshResults: vi.fn().mockReturnValue(of([])),
-      cachedResults: signal<LottoResult[]>([]),
-      isLoading: signal(false),
-      error: signal(''),
-      cacheTimestamp: signal(0),
-      hasCachedData: signal(false)
-    };
-
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    source = new InMemoryResultsSource();
     await TestBed.configureTestingModule({
       imports: [SearchResultsComponent],
       providers: [
-        { provide: LottoService, useValue: mockLottoService },
+        { provide: ResultsSource, useValue: source },
         provideZonelessChangeDetection()
       ]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(SearchResultsComponent);
-    component = fixture.componentInstance;
+    element = fixture.nativeElement;
+    setDraws = [];
+    fixture.componentInstance.winningNumbersSet.subscribe((draw) => setDraws.push(draw));
     await fixture.whenStable();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it('shows the fetch error with a retry button instead of results', async () => {
-    (mockLottoService.error as WritableSignal<string>).set(
-      'Unable to fetch lottery results at this time. Please try again later.'
-    );
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
+  it('fetches recent results when opened and lists them', async () => {
+    expect(source.requests).toBe(1);
+    expect(element.textContent).toContain('Loading results...');
+
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT, MEGALOTTO_RESULT]));
+
+    expect(shownGames()).toEqual(['Ultra Lotto 6/58', 'Megalotto 6/45']);
+    expect(element.querySelector('.search-btn')?.textContent).toContain('Search Again');
+  });
+
+  it("lists only the chosen game's results", async () => {
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT, MEGALOTTO_RESULT]));
+
+    await chooseGame('Megalotto 6/45');
+    expect(shownGames()).toEqual(['Megalotto 6/45']);
+
+    await chooseGame('Lotto 6/42');
+    expect(shownGames()).toEqual([]);
+    expect(element.textContent).toContain('No recent results for Lotto 6/42.');
+
+    await chooseGame('');
+    expect(shownGames()).toEqual(['Ultra Lotto 6/58', 'Megalotto 6/45']);
+  });
+
+  it('shows the fetch error with a retry button that fetches again', async () => {
+    await answer(() => source.fail());
 
     expect(element.querySelector('.error')?.textContent).toContain(
       'Unable to fetch lottery results'
     );
     expect(element.querySelector('.results-table')).toBeNull();
 
-    element.querySelector<HTMLButtonElement>('.retry-btn')?.click();
+    element.querySelector<HTMLButtonElement>('.retry-btn')!.click();
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT]));
 
-    expect(mockLottoService.refreshResults).toHaveBeenCalled();
+    expect(source.requests).toBe(2);
+    expect(shownGames()).toEqual(['Ultra Lotto 6/58']);
+  });
+
+  it('fetches again on Search Again', async () => {
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT]));
+
+    element.querySelector<HTMLButtonElement>('.search-btn')!.click();
+
+    expect(source.requests).toBe(2);
   });
 
   it("sets a result's draw as the winning numbers", async () => {
-    (mockLottoService.cachedResults as WritableSignal<LottoResult[]>).set([RESULT]);
-    await fixture.whenStable();
-    const setDraws: Draw[] = [];
-    component.winningNumbersSet.subscribe((draw) => setDraws.push(draw));
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT]));
 
-    fixture.nativeElement.querySelector('.set-button').click();
+    element.querySelector<HTMLButtonElement>('.set-button')!.click();
 
     expect(setDraws).toEqual([[5, 12, 23, 34, 45, 56]]);
   });
 
-  it('cannot use a result whose numbers are not a draw', async () => {
-    (mockLottoService.cachedResults as WritableSignal<LottoResult[]>).set([
-      { ...RESULT, combinations: '05-12-23-34-45', draw: null },
-    ]);
-    await fixture.whenStable();
+  it("says when a result's numbers cannot be used", async () => {
+    await answer(() =>
+      source.succeed([{ ...ULTRA_LOTTO_RESULT, combinations: '05-12-23-34-45', draw: null }])
+    );
 
-    expect(fixture.nativeElement.querySelector('.set-button').disabled).toBe(true);
+    expect(element.querySelector('.set-button')).toBeNull();
+    expect(element.querySelector('.action')?.textContent?.trim()).toBe('Numbers unreadable');
+  });
+
+  it('names the result each Use Numbers button is for', async () => {
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT]));
+
+    expect(element.querySelector('.set-button')?.getAttribute('aria-label')).toBe(
+      'Use Numbers, Ultra Lotto 6/58, Oct 12, 2026'
+    );
+  });
+
+  it('sums up what it shows in one status line for screen readers', async () => {
+    const status = () => element.querySelector('[role="status"]')?.textContent;
+    expect(status()).toBe('Loading results…');
+
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT, MEGALOTTO_RESULT]));
+    expect(status()).toBe('2 results');
+
+    await chooseGame('Megalotto 6/45');
+    expect(status()).toBe('1 result');
+
+    await chooseGame('Lotto 6/42');
+    expect(status()).toBe('No recent results for Lotto 6/42.');
+    expect(element.querySelector('[aria-live]')).toBeNull();
+  });
+
+  it('keeps showing the earlier results under the error when a new fetch fails', async () => {
+    await answer(() => source.succeed([ULTRA_LOTTO_RESULT]));
+
+    element.querySelector<HTMLButtonElement>('.search-btn')!.click();
+    await answer(() => source.fail());
+
+    expect(element.querySelector('.error')?.getAttribute('role')).toBe('alert');
+    expect(shownGames()).toEqual(['Ultra Lotto 6/58']);
   });
 });

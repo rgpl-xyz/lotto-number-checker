@@ -32,6 +32,8 @@ Under `ng serve` the app can also fetch recent results from pcso.gov.ph and fill
 - With the flag off the "Use Search Results" toggle isn't rendered and nothing contacts PCSO.
 - The tests cover both values through the `FEATURE_FLAGS` token in `src/app/feature-flags.ts`.
 
+The game picker next to the search button narrows the results to one game.
+
 Since October 2026 pcso.gov.ph answers the proxy with 403, so expect the error message and the Try Again button.
 
 ## Deploying
