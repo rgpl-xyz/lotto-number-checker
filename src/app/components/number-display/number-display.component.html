@@ -1,5 +1,5 @@
 <div class="number-display-container">
-  @if (winningNumbers().length === 0) {
+  @if (!winningNumbers()?.length) {
   <p class="info-message">Enter winning numbers first</p>
   }
 

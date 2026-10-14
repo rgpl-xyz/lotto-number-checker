@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, beforeEach, expect, vi } from 'vitest';
+import { describe, it, beforeEach, expect } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import { NumberDisplayComponent } from './number-display.component';
@@ -25,7 +25,7 @@ describe('NumberDisplayComponent', () => {
   });
   
   it('should initialize with default values', () => {
-    expect(component.winningNumbers()).toEqual([]);
+    expect(component.winningNumbers()).toBeNull();
     expect(component.inputNumber()).toBeUndefined();
     expect(component.userNumbers()).toEqual([]);
     expect(component.editingRowIndex()).toBeNull();
@@ -378,14 +378,4 @@ describe('NumberDisplayComponent', () => {
     expect(field.value).toBe('');
   });
 
-  // Note: editNumber uses window.prompt which is difficult to test properly
-  // For this specific method, we'd need to mock window.prompt
-  it('should handle editWinningNumbers event', () => {
-    vi.spyOn(component.editWinningNumbers, 'emit');
-    
-    // Trigger the event
-    component.editWinningNumbers.emit();
-    
-    expect(component.editWinningNumbers.emit).toHaveBeenCalled();
-  });
 });

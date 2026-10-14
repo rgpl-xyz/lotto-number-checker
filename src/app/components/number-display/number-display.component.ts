@@ -4,7 +4,6 @@ import {
   computed,
   signal,
   input,
-  output,
   inject,
   DOCUMENT,
   ChangeDetectionStrategy,
@@ -12,6 +11,7 @@ import {
   viewChild
 } from '@angular/core';
 import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games';
+import { Draw } from '../../lotto/draw';
 
 @Component({
   selector: 'app-number-display',
@@ -21,8 +21,7 @@ import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NumberDisplayComponent {
-  readonly winningNumbers = input<number[]>([]);
-  readonly editWinningNumbers = output<void>();
+  readonly winningNumbers = input<Draw | null>(null);
   readonly inputNumber = signal<number | undefined>(undefined);
   readonly userNumbers = signal<number[]>([]);
   readonly editingRowIndex = signal<number | null>(null);
@@ -31,11 +30,9 @@ export class NumberDisplayComponent {
   private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput');
 
   matchingNumbers = computed(() => {
-    if (!this.winningNumbers().length) return [];
+    if (!this.winningNumbers()?.length) return [];
 
-    return this.userNumbers().filter((num) =>
-      this.winningNumbers().some((winNum) => Number(winNum) === Number(num))
-    );
+    return this.userNumbers().filter((num) => this.isMatching(num));
   });
 
   userNumberRows = computed(() => {
@@ -55,7 +52,7 @@ export class NumberDisplayComponent {
   });
 
   readonly matchesPerRow = computed(() => {
-    if (!this.winningNumbers().length) return [];
+    if (!this.winningNumbers()?.length) return [];
 
     return this.userNumberRows().map(
       (row) => row.filter((num) => this.isMatching(num)).length
@@ -120,9 +117,7 @@ export class NumberDisplayComponent {
   }
 
   isMatching(num: number): boolean {
-    return this.winningNumbers().some(
-      (winNum) => Number(winNum) === Number(num)
-    );
+    return this.winningNumbers()?.includes(num) ?? false;
   }
 
   hasHighestMatches(rowIndex: number): boolean {

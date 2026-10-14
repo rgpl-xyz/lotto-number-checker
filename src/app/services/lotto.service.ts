@@ -4,6 +4,7 @@ import { Observable, EMPTY, of, map, catchError, finalize, tap } from 'rxjs';
 import { signal, computed } from '@angular/core';
 import { LottoResult } from '../models/lotto.model';
 import { gameNamed } from '../lotto/games';
+import { numbersIn, toDraw } from '../lotto/draw';
 
 @Injectable({
   providedIn: 'root',
@@ -108,6 +109,7 @@ export class LottoService {
         return {
           game,
           combinations,
+          draw: toDraw(numbersIn(combinations), gameNamed(game)),
           drawDate,
           jackpot,
           winners,

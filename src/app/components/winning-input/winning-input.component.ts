@@ -2,7 +2,7 @@ import {
   Component,
   output,
   effect,
-  model,
+  input,
   inject,
   ChangeDetectionStrategy,
   DOCUMENT,
@@ -14,7 +14,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
-import { noDuplicateNumbersValidator } from './winning-input.validator';
+import { differentNumbers, lottoNumber } from './winning-input.validator';
+import { Draw, numbersIn, toDraw } from '../../lotto/draw';
 import {
   HIGHEST_NUMBER,
   LOWEST_NUMBER,
@@ -30,9 +31,10 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WinningInputComponent {
-  readonly winningNumbersSet = output<number[]>();
+  readonly winningNumbersSet = output<Draw>();
 
-  readonly numbersToEdit = model<number[]>([]);
+  /** A draw to start from, such as the one being edited. */
+  readonly numbersToEdit = input<Draw | null>(null);
 
   private readonly fb = inject(FormBuilder);
   private readonly document = inject(DOCUMENT);
@@ -41,14 +43,9 @@ export class WinningInputComponent {
     numbers: this.fb.array(
       Array.from(
         { length: NUMBERS_PER_DRAW },
-        () =>
-          new FormControl<number | null>(null, [
-            Validators.required,
-            Validators.min(LOWEST_NUMBER),
-            Validators.max(HIGHEST_NUMBER),
-          ])
+        () => new FormControl<number | null>(null, [Validators.required, lottoNumber])
       ),
-      { validators: [noDuplicateNumbersValidator] }
+      { validators: [differentNumbers] }
     ),
   });
 
@@ -62,9 +59,9 @@ export class WinningInputComponent {
 
   constructor() {
     effect(() => {
-      const numbers = this.numbersToEdit();
-      if (numbers?.length === NUMBERS_PER_DRAW) {
-        this.numbers.patchValue([...numbers]);
+      const draw = this.numbersToEdit();
+      if (draw) {
+        this.numbers.patchValue([...draw]);
       }
     });
   }
@@ -74,12 +71,8 @@ export class WinningInputComponent {
     const paste = event.clipboardData?.getData('text');
     if (!paste) return;
 
-    const parsed = paste
-      .split(/[-,;\s]+/)
-      .filter((s) => s.length > 0)
-      .map((s) => parseInt(s, 10))
-      .filter(isLottoNumber)
-      .slice(0, NUMBERS_PER_DRAW);
+    // The first six numbers some game draws; anything else in the text is skipped.
+    const parsed = numbersIn(paste).filter(isLottoNumber).slice(0, NUMBERS_PER_DRAW);
 
     if (parsed.length > 0) {
       const values: (number | null)[] = [...parsed];
@@ -87,21 +80,15 @@ export class WinningInputComponent {
         values.push(null);
       }
       this.numbers.patchValue(values);
-      if (parsed.length === NUMBERS_PER_DRAW && this.form.valid) {
-        this.submitWinningNumbers();
-      }
+      this.submitWinningNumbers();
     }
   }
 
+  /** Sets the numbers as the winning numbers if they make a draw. */
   submitWinningNumbers(): void {
-    if (this.form.valid) {
-      const values = this.numbers.value;
-      const numbers = values.filter(
-        (v): v is number => v != null && !isNaN(v)
-      ) as number[];
-      if (numbers.length === NUMBERS_PER_DRAW) {
-        this.winningNumbersSet.emit(numbers);
-      }
+    const draw = toDraw(this.numbers.value);
+    if (draw) {
+      this.winningNumbersSet.emit(draw);
     }
   }
 
@@ -109,11 +96,8 @@ export class WinningInputComponent {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     if (index < NUMBERS_PER_DRAW - 1) {
-      const nextInput = this.document.getElementById(
-        `number-input-${index + 1}`
-      );
-      nextInput?.focus();
-    } else if (this.form.valid) {
+      this.document.getElementById(`number-input-${index + 1}`)?.focus();
+    } else {
       this.submitWinningNumbers();
     }
   }

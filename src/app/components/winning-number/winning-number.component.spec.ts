@@ -1,118 +1,92 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal, provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
-import { vi, describe, it, beforeEach, expect } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 import { WinningNumberComponent } from './winning-number.component';
-import { WinningInputComponent } from '../winning-input/winning-input.component';
-import { NumberDisplayComponent } from '../number-display/number-display.component';
-import { SearchResultsComponent } from '../search-results/search-results.component';
 import { LottoService } from '../../services/lotto.service';
 import { FEATURE_FLAGS, FeatureFlags } from '../../feature-flags';
+import { LottoResult } from '../../models/lotto.model';
+import { toDraw } from '../../lotto/draw';
+
+const RESULT: LottoResult = {
+  game: 'Ultra Lotto 6/58',
+  combinations: '05-12-23-34-45-56',
+  draw: toDraw([5, 12, 23, 34, 45, 56]),
+  drawDate: new Date('10/12/2026'),
+  jackpot: '49,500,000.00',
+  winners: '0',
+};
+
+async function render(flags: FeatureFlags = { liveResults: false }) {
+  const lottoService = {
+    getLottoResults: vi.fn().mockReturnValue(of([RESULT])),
+    refreshResults: vi.fn().mockReturnValue(of([RESULT])),
+    cachedResults: signal([RESULT]),
+    isLoading: signal(false),
+    error: signal(''),
+    cacheTimestamp: signal(0),
+    hasCachedData: signal(true)
+  };
+
+  await TestBed.configureTestingModule({
+    imports: [WinningNumberComponent],
+    providers: [
+      { provide: LottoService, useValue: lottoService },
+      { provide: FEATURE_FLAGS, useValue: flags },
+      provideZonelessChangeDetection()
+    ]
+  }).compileComponents();
+
+  const fixture = TestBed.createComponent(WinningNumberComponent);
+  await fixture.whenStable();
+  const element: HTMLElement = fixture.nativeElement;
+  return { fixture, element, lottoService };
+}
+
+const winningField = (element: HTMLElement, index: number) =>
+  element.querySelector<HTMLInputElement>(`#number-input-${index}`)!;
+
+const shownWinningNumbers = (element: HTMLElement) =>
+  Array.from(element.querySelectorAll('.winning-numbers-display .number-badge')).map(
+    (ball) => ball.textContent?.trim()
+  );
 
 describe('WinningNumberComponent', () => {
-  let component: WinningNumberComponent;
-  let fixture: ComponentFixture<WinningNumberComponent>;
+  it('asks for the winning numbers first', async () => {
+    const { element } = await render();
 
-  beforeEach(async () => {
-    const mockLottoService = {
-      getLottoResults: vi.fn().mockReturnValue(of([])),
-      refreshResults: vi.fn().mockReturnValue(of([])),
-      cachedResults: signal([]),
-      isLoading: signal(false),
-      error: signal(''),
-      cacheTimestamp: signal(0),
-      hasCachedData: signal(false)
-    };
+    expect(element.querySelector('h1')?.textContent).toBe('Lotto Number Checker');
+    expect(element.querySelector('app-winning-input')).not.toBeNull();
+    expect(element.querySelector('.info-message')?.textContent).toContain(
+      'Enter winning numbers first'
+    );
+  });
 
-    await TestBed.configureTestingModule({
-      imports: [
-        WinningNumberComponent,
-        WinningInputComponent,
-        NumberDisplayComponent,
-        SearchResultsComponent,
-      ],
-      providers: [
-        { provide: LottoService, useValue: mockLottoService },
-        provideZonelessChangeDetection()
-      ]
-    }).compileComponents();
+  it('shows the winning numbers once they are set, and the form with them on Edit', async () => {
+    const { fixture, element } = await render();
 
-    fixture = TestBed.createComponent(WinningNumberComponent);
-    component = fixture.componentInstance;
+    for (const [index, value] of [4, 8, 15, 16, 23, 42].entries()) {
+      winningField(element, index).value = String(value);
+      winningField(element, index).dispatchEvent(new Event('input'));
+    }
     await fixture.whenStable();
-  });
+    element.querySelector<HTMLButtonElement>('.submit-button')!.click();
+    await fixture.whenStable();
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    expect(shownWinningNumbers(element)).toEqual(['4', '8', '15', '16', '23', '42']);
+    expect(element.querySelector('app-winning-input')).toBeNull();
+    expect(element.querySelector('.info-message')).toBeNull();
 
-  it('should have default values', () => {
-    expect(component.title()).toBe('Lotto Number Checker');
-    expect(component.winningNumbers()).toEqual([]);
-    expect(component.isEditMode()).toBe(true);
-  });
+    element.querySelector<HTMLButtonElement>('.winning-numbers-display .edit-button')!.click();
+    await fixture.whenStable();
 
-  it('should set winning numbers and toggle edit mode', () => {
-    const testNumbers = [1, 2, 3, 4, 5, 6];
-
-    component.setWinningNumbers(testNumbers);
-
-    expect(component.winningNumbers()).toEqual(testNumbers);
-    expect(component.isEditMode()).toBe(false);
-  });
-
-  it('should enable edit mode when editWinningNumbers is called', () => {
-    // First set edit mode to false
-    component.isEditMode.set(false);
-    expect(component.isEditMode()).toBe(false);
-
-    // Call the editWinningNumbers method
-    component.editWinningNumbers();
-
-    // Expect edit mode to be true now
-    expect(component.isEditMode()).toBe(true);
-  });
-
-  it('should have useSearch default to false', () => {
-    expect(component.useSearch()).toBe(false);
-  });
-
-  it('should toggle useSearch when checkbox is changed', () => {
-    component.useSearch.set(true);
-    expect(component.useSearch()).toBe(true);
-
-    component.useSearch.set(false);
-    expect(component.useSearch()).toBe(false);
+    expect([0, 1, 2, 3, 4, 5].map((index) => winningField(element, index).value)).toEqual([
+      '4', '8', '15', '16', '23', '42',
+    ]);
   });
 });
 
 describe('WinningNumberComponent live results flag', () => {
-  async function render(flags: FeatureFlags) {
-    const lottoService = {
-      getLottoResults: vi.fn().mockReturnValue(of([])),
-      refreshResults: vi.fn().mockReturnValue(of([])),
-      cachedResults: signal([]),
-      isLoading: signal(false),
-      error: signal(''),
-      cacheTimestamp: signal(0),
-      hasCachedData: signal(false)
-    };
-
-    await TestBed.configureTestingModule({
-      imports: [WinningNumberComponent],
-      providers: [
-        { provide: LottoService, useValue: lottoService },
-        { provide: FEATURE_FLAGS, useValue: flags },
-        provideZonelessChangeDetection()
-      ]
-    }).compileComponents();
-
-    const fixture = TestBed.createComponent(WinningNumberComponent);
-    await fixture.whenStable();
-    const element: HTMLElement = fixture.nativeElement;
-    return { fixture, element, lottoService };
-  }
-
   it('hides the search toggle and never fetches when live results are off', async () => {
     const { fixture, element, lottoService } = await render({ liveResults: false });
 
@@ -144,5 +118,17 @@ describe('WinningNumberComponent live results flag', () => {
     expect(element.querySelector('app-search-results')).not.toBeNull();
     expect(element.querySelector('app-winning-input')).not.toBeNull();
     expect(lottoService.getLottoResults).toHaveBeenCalled();
+  });
+
+  it('uses a search result as the winning numbers', async () => {
+    const { fixture, element } = await render({ liveResults: true });
+
+    element.querySelector<HTMLInputElement>('#use-search')?.click();
+    await fixture.whenStable();
+    element.querySelector<HTMLButtonElement>('.set-button')!.click();
+    await fixture.whenStable();
+
+    expect(shownWinningNumbers(element)).toEqual(['5', '12', '23', '34', '45', '56']);
+    expect(element.querySelector('app-search-results')).toBeNull();
   });
 });

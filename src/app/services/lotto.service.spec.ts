@@ -53,6 +53,7 @@ describe('LottoService', () => {
       {
         game: 'Ultra Lotto 6/58',
         combinations: '05-12-23-34-45-56',
+        draw: [5, 12, 23, 34, 45, 56],
         drawDate: new Date('10/12/2026'),
         jackpot: '49,500,000.00',
         winners: '0',
@@ -60,6 +61,28 @@ describe('LottoService', () => {
     ]);
     expect(service.isLoading()).toBe(false);
     expect(service.hasCachedData()).toBe(true);
+  });
+
+  it('gives no draw for a result whose numbers are not one', () => {
+    const next = vi.fn();
+    service.getLottoResults().subscribe(next);
+
+    http
+      .expectOne(RESULTS_URL)
+      .flush(PCSO_RESULTS_PAGE.replace('05-12-23-34-45-56', '05-12-23-34-45-59'));
+
+    expect(next.mock.calls[0][0][0].draw).toBeNull();
+  });
+
+  it('checks the numbers against the game they were drawn in', () => {
+    const next = vi.fn();
+    service.getLottoResults().subscribe(next);
+
+    http
+      .expectOne(RESULTS_URL)
+      .flush(PCSO_RESULTS_PAGE.replace('Ultra Lotto 6/58', 'Megalotto 6/45'));
+
+    expect(next.mock.calls[0][0][0].draw).toBeNull();
   });
 
   it('sends a plain request without browser-impersonation headers', () => {

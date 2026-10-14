@@ -6,6 +6,16 @@ import { vi, describe, it, beforeEach, expect } from 'vitest';
 import { SearchResultsComponent } from './search-results.component';
 import { LottoService } from '../../services/lotto.service';
 import { LottoResult } from '../../models/lotto.model';
+import { Draw, toDraw } from '../../lotto/draw';
+
+const RESULT: LottoResult = {
+  game: 'Ultra Lotto 6/58',
+  combinations: '05-12-23-34-45-56',
+  draw: toDraw([5, 12, 23, 34, 45, 56]),
+  drawDate: new Date('10/12/2026'),
+  jackpot: '49,500,000.00',
+  winners: '0',
+};
 
 type MockLottoService = {
   getLottoResults: ReturnType<typeof vi.fn>;
@@ -26,7 +36,7 @@ describe('SearchResultsComponent', () => {
     mockLottoService = {
       getLottoResults: vi.fn().mockReturnValue(of([])),
       refreshResults: vi.fn().mockReturnValue(of([])),
-      cachedResults: signal([]),
+      cachedResults: signal<LottoResult[]>([]),
       isLoading: signal(false),
       error: signal(''),
       cacheTimestamp: signal(0),
@@ -66,5 +76,25 @@ describe('SearchResultsComponent', () => {
     element.querySelector<HTMLButtonElement>('.retry-btn')?.click();
 
     expect(mockLottoService.refreshResults).toHaveBeenCalled();
+  });
+
+  it("sets a result's draw as the winning numbers", async () => {
+    (mockLottoService.cachedResults as WritableSignal<LottoResult[]>).set([RESULT]);
+    await fixture.whenStable();
+    const setDraws: Draw[] = [];
+    component.winningNumbersSet.subscribe((draw) => setDraws.push(draw));
+
+    fixture.nativeElement.querySelector('.set-button').click();
+
+    expect(setDraws).toEqual([[5, 12, 23, 34, 45, 56]]);
+  });
+
+  it('cannot use a result whose numbers are not a draw', async () => {
+    (mockLottoService.cachedResults as WritableSignal<LottoResult[]>).set([
+      { ...RESULT, combinations: '05-12-23-34-45', draw: null },
+    ]);
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.set-button').disabled).toBe(true);
   });
 });

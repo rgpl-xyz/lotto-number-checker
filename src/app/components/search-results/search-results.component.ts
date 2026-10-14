@@ -13,7 +13,9 @@ import { GameSelectionComponent } from '../game-selection/game-selection.compone
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { LottoService } from '../../services/lotto.service';
+import { LottoResult } from '../../models/lotto.model';
 import { LottoGame } from '../../lotto/games';
+import { Draw } from '../../lotto/draw';
 
 @Component({
   selector: 'app-search-results',
@@ -23,7 +25,7 @@ import { LottoGame } from '../../lotto/games';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchResultsComponent implements OnInit {
-  readonly winningNumbersSet = output<number[]>();
+  readonly winningNumbersSet = output<Draw>();
 
   readonly selectedGame = signal<LottoGame | null>(null);
 
@@ -68,7 +70,9 @@ export class SearchResultsComponent implements OnInit {
       .subscribe();
   }
 
-  setWinningNumbers(combinations: string) {
-    this.winningNumbersSet.emit(combinations.split('-').map(Number));
+  setWinningNumbers(result: LottoResult): void {
+    if (result.draw) {
+      this.winningNumbersSet.emit(result.draw);
+    }
   }
 }
