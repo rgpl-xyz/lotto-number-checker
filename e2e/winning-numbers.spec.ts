@@ -24,7 +24,7 @@ test('six typed numbers become the winning numbers', async ({ page }) => {
 
 test('the numbers are only set once they are six different numbers from 1 to 58', async ({ page }) => {
   const set = page.getByRole('button', { name: 'Set Winning Numbers' });
-  await expect(page.getByText('Enter or paste 6 numbers between 1 and 58:')).toBeVisible();
+  await expect(page.getByText('Enter or paste 6 numbers between 1 and 58.')).toBeVisible();
 
   for (const [index, number] of [4, 8, 15, 16, 23].entries()) {
     await winningField(page, index).fill(String(number));

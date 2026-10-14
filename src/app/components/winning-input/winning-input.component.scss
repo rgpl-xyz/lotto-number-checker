@@ -1,40 +1,51 @@
 @use '../../styles/shared' as *;
 
-.winning-input-container {
-  margin-top: 20px;
+.instruction {
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: var(--purple-muted);
+}
+
+.number-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 20px;
+}
 
-  .instruction {
-    margin-bottom: 15px;
-    font-size: 16px;
+// Each winning number goes in an empty ball.
+.number-input {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--purple-ink);
+  background: white;
+  border: 2px dashed #b9a6dc;
+  border-radius: 50%;
+
+  &:focus {
+    border: 2px solid var(--purple);
+    outline: 2px solid var(--purple-tint);
+    outline-offset: 0;
   }
+}
 
+.submit-button {
+  @extend %pill;
+}
+
+@media (max-width: 768px) {
   .number-inputs {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 20px;
-    gap: 1rem;
-
-    .input-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 10px;
-
-      .input-label {
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: var(--gray-900);
-        margin-bottom: 4px;
-        text-align: center;
-      }
-    }
+    gap: 8px;
   }
 
-  .submit-button {
-    @extend %btn-large;
-    display: block;
-    margin: 0 auto;
+  .number-input {
+    width: 48px;
+    height: 48px;
+    font-size: 19px;
   }
 }

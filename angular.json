@@ -29,6 +29,7 @@
               }
             ],
             "styles": [
+              "@fontsource-variable/outfit/wght.css",
               "src/styles.scss"
             ],
             "scripts": []

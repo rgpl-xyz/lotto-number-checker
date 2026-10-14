@@ -1,10 +1,10 @@
 <div class="winning-input-container" [formGroup]="form">
-  <p class="instruction">Enter or paste {{ controlIndices.length }} numbers between {{ lowest }} and {{ highest }}:</p>
+  <p class="instruction">Enter or paste {{ controlIndices.length }} numbers between {{ lowest }} and {{ highest }}.</p>
 
   <div class="number-inputs" formArrayName="numbers">
     @for (i of controlIndices; track i) {
       <div class="input-container">
-        <label [for]="'number-input-' + i" class="input-label"
+        <label [for]="'number-input-' + i" class="input-label visually-hidden"
           >Number {{ i + 1 }}</label
         >
         <input

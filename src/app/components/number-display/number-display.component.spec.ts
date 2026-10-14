@@ -18,9 +18,10 @@ describe('NumberDisplayComponent', () => {
         Number(ball.firstChild?.textContent?.trim())
       )
     );
+  /** The row's button whose accessible name starts with this word, such as "Edit". */
   const button = (row: HTMLElement, name: string) =>
-    Array.from(row.querySelectorAll<HTMLButtonElement>('button')).find(
-      (candidate) => candidate.textContent?.trim() === name
+    Array.from(row.querySelectorAll<HTMLButtonElement>('button')).find((candidate) =>
+      (candidate.getAttribute('aria-label') ?? candidate.textContent?.trim() ?? '').startsWith(name)
     )!;
 
   async function type(value: string): Promise<void> {
@@ -116,14 +117,21 @@ describe('NumberDisplayComponent', () => {
     );
     expect(matching).toEqual([[1, 2, 3], [], [1, 2, 3, 4, 5]]);
     expect(rows().map((row) => row.classList.contains('matches-info'))).toEqual([false, false, true]);
-    expect(element.textContent).toContain('Your highest matching row has 5 matching numbers!');
+    expect(element.textContent).toContain('Best row: C, with 5 matches.');
   });
 
   it('shows no match summary when nothing matches', async () => {
     fixture.componentRef.setInput('winningNumbers', toDraw([1, 2, 3, 4, 5, 6]));
     await addNumbers(10, 11, 12, 13, 14, 15);
 
-    expect(element.textContent).not.toContain('Your highest matching row');
+    expect(element.textContent).not.toContain('Best row');
+  });
+
+  it('names every row in a tie for the most matches', async () => {
+    fixture.componentRef.setInput('winningNumbers', toDraw([1, 2, 3, 4, 5, 6]));
+    await addNumbers(1, 20, 21, 22, 23, 24, 30, 31, 32, 33, 34, 35, 2, 40, 41, 42, 43, 44);
+
+    expect(element.textContent).toContain('Best rows: A and C, with 1 match each.');
   });
 
   it('marks the row being edited, with focus on its first pencil, and back on Edit after Done', async () => {

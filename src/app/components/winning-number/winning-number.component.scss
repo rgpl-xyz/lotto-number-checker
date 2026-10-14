@@ -1,34 +1,87 @@
 @use '../../styles/shared' as *;
 
+:host {
+  display: block;
+  padding: 40px 0 56px;
+}
+
+h1 {
+  margin-bottom: 24px;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.section {
+  @extend %section;
+}
+
 .numbers-title {
-  margin-bottom: 25px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--light-gray);
+  @extend %section-title;
 }
 
 .number-list {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
-.search {
-  font-size: 14px;
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: -1rem;
-  padding-bottom: 1rem;
+// The drawn numbers, as large as a ticket's are small.
+.number-list app-number-ball {
+  width: 64px;
+  font-size: 24px;
+}
 
-  input {
-    margin-left: 0;
-    margin-right: 5px;
+// Set numbers are drawn one ball at a time, like a live draw.
+.number-list app-number-ball {
+  animation: draw-ball 420ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+@for $ball from 2 through 6 {
+  .number-list app-number-ball:nth-child(#{$ball}) {
+    animation-delay: #{($ball - 1) * 90}ms;
   }
 }
 
+@keyframes draw-ball {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .number-list app-number-ball {
+    animation: none;
+  }
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
 .edit-button {
-  @extend %btn-base;
-  margin-left: auto;
+  @extend %pill-quiet;
+  margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  .number-list app-number-ball {
+    width: 48px;
+    font-size: 19px;
+  }
+
+  .edit-button {
+    margin-left: 0;
+  }
 }

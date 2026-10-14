@@ -16,7 +16,7 @@ test('a pencil changes one number, and focus follows Edit and Done', async ({ pa
   page.once('dialog', (dialog) => dialog.accept('16'));
   await row.getByRole('button', { name: 'Change 1 in row A', exact: true }).click();
   await expect.poll(() => ballNumbers(row)).toEqual([4, 8, 15, 16, 2, 3]);
-  await expect(page.getByText('Your highest matching row has 4 matching numbers!')).toBeVisible();
+  await expect(page.getByText('Best row: A, with 4 matches.')).toBeVisible();
 
   await row.getByRole('button', { name: 'Done' }).click();
   await expect(row.getByRole('button', { name: 'Edit' })).toBeFocused();
@@ -52,14 +52,14 @@ test('a change to a number the row has, or one above 58, is refused', async ({ p
 
 test('the row being edited is outlined without changing size', async ({ page }) => {
   await addNumbers(page, [4, 8, 15, 1, 2, 3]);
-  const numbers = ticketRow(page, 'A').locator('.number-row');
-  await expect(numbers.locator('app-number-ball')).toHaveCount(6);
-  const before = await numbers.boundingBox();
+  const row = ticketRow(page, 'A');
+  await expect(row.locator('app-number-ball')).toHaveCount(6);
+  const before = await row.boundingBox();
 
-  await ticketRow(page, 'A').getByRole('button', { name: 'Edit' }).click();
+  await row.getByRole('button', { name: 'Edit' }).click();
 
-  await expect(numbers).toHaveCSS('border-top-style', 'dashed');
-  expect(await numbers.boundingBox()).toEqual(before);
+  await expect(row).toHaveCSS('outline-color', 'rgb(103, 58, 183)');
+  expect(await row.boundingBox()).toEqual(before);
 });
 
 test('deleting a row above the one being edited keeps editing that row', async ({ page }) => {

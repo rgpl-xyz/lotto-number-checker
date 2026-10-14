@@ -1,127 +1,89 @@
-// Shared SCSS placeholders and base styles for components
+// Shared shapes for the components: pills, in two weights.
 
-// Button Base Styles
-%btn-base {
-  background: var(--primary-color);
+// A filled purple pill: the main action in its place.
+%pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
   color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
+  background: var(--purple);
+  border: 1px solid var(--purple);
+  border-radius: 999px;
   cursor: pointer;
-  transition: background-color 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  &:hover { background: var(--darker-primary-color); }
-  &:focus { outline: 2px solid var(--primary-color); outline-offset: 2px; }
-  &:active { background: var(--darker-primary-color); }
-  &:disabled { background: var(--gray-400); cursor: not-allowed; opacity: 0.6; }
+
+  &:hover,
+  &:active {
+    background: var(--purple-deep);
+    border-color: var(--purple-deep);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    color: var(--purple-muted);
+    background: var(--purple-tint);
+    border-color: var(--purple-tint);
+    cursor: not-allowed;
+  }
 }
 
-%btn-secondary {
-  @extend %btn-base;
-  background: var(--secondary-color);
-  
-  &:hover { background: var(--darker-secondary-color); }
-  &:focus { outline-color: var(--secondary-color); }
-  &:active { background: var(--darker-secondary-color); }
+// A quiet pill: purple lettering on the canvas, for actions beside the main one.
+%pill-quiet {
+  @extend %pill;
+  color: var(--purple);
+  background: transparent;
+  border-color: var(--purple-line);
+
+  &:hover,
+  &:active {
+    color: var(--purple-deep);
+    background: var(--purple-tint);
+    border-color: var(--purple-line);
+  }
 }
 
-%btn-small {
-  @extend %btn-base;
-  padding: 5px 10px;
-  font-size: 12px;
+%pill-small {
+  padding: 5px 12px;
+  font-size: 13px;
 }
 
-%btn-large {
-  @extend %btn-base;
-  padding: 12px 24px;
+// A text field shaped like a pill.
+%pill-field {
+  padding: 10px 18px;
   font-size: 16px;
-}
-
-// Action Button (for edit/delete/done buttons)
-%action-button {
-  @extend %btn-base; // keeps interaction states & accessibility
-  padding: 5px 10px;
-  font-size: 12px;
-  background: var(--light-gray);
-  color: var(--primary-color);
-}
-
-// Input Group Base
-%input-group {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-// Status Message Base
-%status-info {
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  background-color: #e3f2fd;
-  border-left: 4px solid var(--primary-color);
-}
-
-%status-success {
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  background-color: #e8f5e9;
-  border-left: 4px solid var(--accent-color);
-}
-
-// Loading Spinner
-%loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-// Table Base Styles
-%table-base {
-  width: 100%;
-  border-collapse: collapse;
+  color: var(--purple-ink);
   background: white;
-  font-size: 14px;
-  line-height: 1.5;
-}
+  border: 1px solid var(--purple-line);
+  border-radius: 999px;
 
-%table-header {
-  background: #f5f5f5;
-  border-bottom: 2px solid #e0e0e0;
-  
-  th {
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 13px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-right: 1px solid #e0e0e0;
-    
-    &:last-child { border-right: none; }
+  &::placeholder {
+    color: var(--purple-muted);
+  }
+
+  // One ring: the border turns purple and thickens by an outline laid on it.
+  &:focus {
+    border-color: var(--purple);
+    outline: 1px solid var(--purple);
+    outline-offset: 0;
   }
 }
 
-%table-body {
-  tr {
-    border-bottom: 1px solid #f0f0f0;
-    &:hover { background: #fafafa; }
-    &:last-child { border-bottom: none; }
-  }
-  
-  td {
-    padding: 12px 16px;
-    vertical-align: middle;
-    border-right: 1px solid #f0f0f0;
-    &:last-child { border-right: none; }
-  }
-} 
+// A section of the page: no box, a hairline above the next one.
+%section {
+  padding: 28px 0;
+  border-top: 1px solid var(--purple-line);
+}
+
+%section-title {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 700;
+}

@@ -1,207 +1,183 @@
 @use '../../styles/shared' as *;
 
-.number-display-container {
-  margin-top: 20px;
-
-  .info-message {
-    @extend %status-info;
-  }
-
-  .user-numbers {
-    margin-top: 20px;
-  }
-
-  .matches-info {
-    @extend %status-success;
-  }
+.info-message {
+  margin-bottom: 14px;
+  font-size: 15px;
+  color: var(--purple-muted);
 }
 
-// The pencil on each ball of the row being edited.
-.edit-number {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 20px;
-  height: 20px;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  cursor: pointer;
-  z-index: 2;
-  padding: 0;
-  border: none;
-  line-height: 1;
-}
-
-.data-row {
+.input-group {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 10px;
+  align-items: center;
+  gap: 10px;
 
-  &:not(.matches-info) {
-    margin: 15px 10px 15px 15px;
+  .number-input {
+    @extend %pill-field;
+    width: 220px;
+  }
+
+  .add-button {
+    @extend %pill;
+  }
+}
+
+.user-numbers {
+  margin-top: 24px;
+}
+
+// The result the page is for: a line as strong as a section title.
+.best-summary {
+  margin-bottom: 14px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.rows {
+  margin-bottom: 20px;
+}
+
+// A ticket row: a pill around the row's letter, six ball places and its actions. Every
+// row has the same places, so the rows line up like lines on a ticket.
+.data-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 8px;
+  padding: 6px 8px 6px 14px;
+  background: white;
+  border: 1px solid var(--purple-line);
+  border-radius: 999px;
+
+  // The row with the most matches.
+  &.matches-info {
+    background: var(--gold-tint);
+    border-color: var(--gold);
+  }
+
+  // The row being edited: a ring drawn as an outline, so the row keeps its size.
+  &.editing-row {
+    outline: 2px solid var(--purple);
+    outline-offset: -1px;
   }
 
   .number-row {
     display: flex;
+    flex: 1 1 auto;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 10px;
-    padding: 5px;
-    border-radius: 4px;
-
-    // The same size as any other row, so nothing moves when editing starts.
-    &.editing {
-      background-color: #f5f5f5;
-      border: 1px dashed #ccc;
-      padding: 4px;
-    }
-
-    .row-label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 30px;
-      height: 30px;
-      background-color: var(--primary-color);
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      margin-right: 5px;
-      width: 30px;
-      flex: 0 0 30px;
-    }
+    gap: 8px;
+    min-width: 0;
   }
-  
+
+  .row-label {
+    flex: 0 0 16px;
+    font-weight: 700;
+    color: var(--purple);
+  }
+
   .row-actions {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-left: auto;
+    flex: 0 0 72px;
+    justify-content: flex-end;
+    gap: 6px;
   }
 }
 
-.input-group {
-  @extend %input-group;
-  margin-bottom: 20px;
-
-  input.number-input {
-    flex: 1;
-    max-width: 190px;
-    min-width: 190px;
-  }
-
-  .add-button {
-    flex: 0 0 auto;
-  }
+// A place for a number not yet added: an empty ball, like the winning slots.
+.empty-slot {
+  flex-shrink: 1;
+  width: 40px;
+  min-width: 0;
+  aspect-ratio: 1;
+  border: 2px dashed #cbbde6;
+  border-radius: 50%;
 }
 
-// Button styles
+// Edit and Delete are small round buttons; their labels name the row.
 .edit-button,
-.delete-button,
-.done-button {
-  @extend %action-button;
-}
-
-.edit-button {
-  background: var(--primary-color);
-  color: white;
-  
-  &:hover {
-    background: var(--darker-primary-color);
-  }
-  
-  &:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-  }
-  
-  &:active {
-    background: var(--darker-primary-color);
-  }
-}
-
 .delete-button {
-  @extend %btn-secondary;
-  
-  &:hover {
-    background: var(--darker-secondary-color);
-    color: white;
-  }
-  
-  &:focus {
-    outline: 2px solid var(--secondary-color);
-    outline-offset: 2px;
-  }
-  
-  &:active {
-    background: var(--darker-secondary-color);
-    color: white;
+  @extend %pill-quiet;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }
 
 .done-button {
-  background-color: #2e7d32;
-  color: white;
-
-  &:hover {
-    background-color: #1b5e20;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
+  @extend %pill;
+  @extend %pill-small;
+  width: 100%;
 }
 
 .clear-button {
-  @extend %btn-secondary;
-  margin-top: 10px;
-  font-weight: 700;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  @extend %pill-quiet;
+}
 
-  &:focus {
-    outline: 3px solid #000;
-    outline-offset: 2px;
-  }
+// While a row is edited, each ball is its own button, ringed in purple. The pencil is
+// for screen readers (its label names the number and row); on screen the ring says it.
+.edit-number {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  font-size: 0;
+  color: var(--purple);
+  background: transparent;
+  border: 2px solid var(--purple);
+  border-radius: 50%;
 
-  &:disabled {
-    background-color: var(--gray-400);
-    color: var(--gray-900);
-    text-shadow: none;
+  &:hover,
+  &:active {
+    color: var(--purple-deep);
+    background: rgba(103, 58, 183, 0.12);
+    border-color: var(--purple-deep);
   }
 }
 
 @media (max-width: 768px) {
-  .input-group {
-    flex-direction: column;
-    align-items: stretch;
-    
-    input.number-input {
-      width: 100%;
+  .input-group .number-input {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  .data-row {
+    gap: 6px;
+    width: 100%;
+    padding: 5px 5px 5px 12px;
+
+    .number-row {
+      gap: 4px;
     }
-    
-    .add-button {
-      width: 100%;
-      padding: 10px;
+
+    .row-label {
+      flex-basis: 12px;
+    }
+
+    .row-actions {
+      flex-basis: 62px;
+      gap: 4px;
     }
   }
-  
-  .data-row {
-    flex-direction: column;
-    // One line, so every part is as wide as the row and not as its widest part.
-    flex-wrap: nowrap;
-    
-    .number-row {
-      margin-bottom: 10px;
-      // The balls shrink to fit, so the row no longer scrolls, which
-      // clipped the edit pencils.
-      gap: 4px;
-      padding-bottom: 5px;
-    }
-    
-    .row-actions {
-      align-self: flex-end;
-      margin-bottom: 5px;
-    }
+
+  .empty-slot {
+    width: 35px;
+  }
+
+  .edit-button,
+  .delete-button {
+    width: 30px;
+    height: 30px;
   }
 }

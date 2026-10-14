@@ -16,7 +16,7 @@ test('numbers fill rows of six and the row with the most matches stands out', as
   await expect(ticketRow(page, 'B').getByText('(match)')).toHaveCount(4);
   await expect(ticketRow(page, 'C').getByText('(match)')).toHaveCount(0);
 
-  await expect(page.getByText('Your highest matching row has 4 matching numbers!')).toBeVisible();
+  await expect(page.getByText('Best row: B, with 4 matches.')).toBeVisible();
   await expect(ticketRow(page, 'B')).toHaveClass(/matches-info/);
   await expect(ticketRow(page, 'A')).not.toHaveClass(/matches-info/);
 });
@@ -36,6 +36,12 @@ test('the entry takes whole numbers from 1 to 58 only', async ({ page }) => {
   await expect.poll(() => ballNumbers(ticketRow(page, 'A'))).toEqual([58]);
 });
 
+test('a row not yet full shows its empty places', async ({ page }) => {
+  await addNumbers(page, [4, 8]);
+
+  await expect(ticketRow(page, 'A').locator('.empty-slot')).toHaveCount(4);
+});
+
 test('a number already in the row being filled is not added again', async ({ page }) => {
   await addNumbers(page, [7, 7, 21]);
 
@@ -47,6 +53,6 @@ test('Clear All empties the ticket', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Clear All' }).click();
 
-  await expect(page.getByRole('heading', { name: 'Your Numbers:' })).toBeHidden();
+  await expect(page.getByText(/^Best row/)).toBeHidden();
   await expect(page.locator('.data-row')).toHaveCount(0);
 });

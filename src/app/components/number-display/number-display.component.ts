@@ -13,7 +13,7 @@ import {
   viewChildren
 } from '@angular/core';
 import { NumberBallComponent } from '../number-ball/number-ball.component';
-import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games';
+import { HIGHEST_NUMBER, LOWEST_NUMBER, NUMBERS_PER_DRAW, isLottoNumber } from '../../lotto/games';
 import { Draw } from '../../lotto/draw';
 import {
   EMPTY_TICKET,
@@ -44,6 +44,24 @@ export class NumberDisplayComponent {
   protected readonly editingRow = signal<number | null>(null);
 
   protected readonly checked = computed(() => checkTicket(this.ticket(), this.winningNumbers()));
+
+  /** For each row, the places still empty, drawn as empty balls. */
+  protected readonly emptySlots = computed(() =>
+    this.checked().rows.map((row) =>
+      Array.from({ length: NUMBERS_PER_DRAW - row.numbers.length }, (_, slot) => slot)
+    )
+  );
+
+  /** Names the best row, as "Best row: B, with 4 matches.", or every row in a tie. */
+  protected readonly bestSummary = computed(() => {
+    const { rows, bestMatches } = this.checked();
+    const labels = rows.filter((row) => row.best).map((row) => row.label);
+    if (labels.length === 0) return '';
+    const matches = `${bestMatches} ${bestMatches === 1 ? 'match' : 'matches'}`;
+    if (labels.length === 1) return `Best row: ${labels[0]}, with ${matches}.`;
+    const names = `${labels.slice(0, -1).join(', ')} and ${labels.at(-1)}`;
+    return `Best rows: ${names}, with ${matches} each.`;
+  });
   protected readonly isInputValid = computed(() => isLottoNumber(this.inputNumber()));
 
   private readonly document = inject(DOCUMENT);

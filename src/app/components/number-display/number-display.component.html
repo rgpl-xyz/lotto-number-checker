@@ -5,7 +5,7 @@
 
   <div class="number-entry">
     <div class="input-group">
-      <label for="number-input">Enter your numbers</label>
+      <label for="number-input" class="visually-hidden">Enter your numbers</label>
       <input
         #numberInput
         id="number-input"
@@ -30,10 +30,13 @@
 
   @if (checked().rows.length > 0) {
   <div class="user-numbers">
-    <h3>Your Numbers:</h3>
+    @if (bestSummary(); as summary) {
+    <p class="best-summary">{{ summary }}</p>
+    }
 
+    <div class="rows">
     @for (row of checked().rows; track $index; let rowIndex = $index) {
-    <div class="data-row" [class.matches-info]="row.best">
+    <div class="data-row" [class.matches-info]="row.best" [class.editing-row]="editingRow() === rowIndex">
       <div class="number-row" [class.editing]="editingRow() === rowIndex">
         <div class="row-label">{{ row.label }}</div>
         @for (number of row.numbers; track $index; let position = $index) {
@@ -48,21 +51,21 @@
           }
         </app-number-ball>
         }
+        @for (slot of emptySlots()[rowIndex]; track slot) {
+        <span class="empty-slot" aria-hidden="true"></span>
+        }
       </div>
       <div class="row-actions">
         @if (editingRow() !== rowIndex) {
-        <button #editButton class="edit-button" (click)="editRow(rowIndex)">Edit</button>
-        <button class="delete-button" (click)="deleteRow(rowIndex)">Delete</button>
+        <button #editButton class="edit-button" [attr.aria-label]="'Edit row ' + row.label" (click)="editRow(rowIndex)"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M10.5 2.5l3 3L5.5 13.5H2.5v-3z M8.5 4.5l3 3"/></svg></button>
+        <button class="delete-button" [attr.aria-label]="'Delete row ' + row.label" (click)="deleteRow(rowIndex)"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
         } @else {
         <button class="done-button" (click)="finishEditing()">Done</button>
         }
       </div>
     </div>
-    } @if (checked().bestMatches > 0) {
-    <div class="matches-info">
-      <p>Your highest matching row has {{ checked().bestMatches }} matching numbers!</p>
-    </div>
     }
+    </div>
 
     <button class="clear-button" (click)="clearNumbers()">Clear All</button>
   </div>
