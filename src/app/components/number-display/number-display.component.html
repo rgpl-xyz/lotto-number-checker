@@ -1,5 +1,5 @@
 <div class="number-display-container">
-  @if (!winningNumbers()?.length) {
+  @if (!winningNumbers()) {
   <p class="info-message">Enter winning numbers first</p>
   }
 
@@ -12,7 +12,7 @@
         type="number"
         [min]="lowest"
         [max]="highest"
-        [value]="inputNumber()"
+        [value]="inputNumber() ?? ''"
         (input)="setNumberInput($any($event.target).value)"
         (keydown.enter)="addNumber()"
         placeholder="Enter a number ({{ lowest }}-{{ highest }})"
@@ -28,41 +28,40 @@
     </div>
   </div>
 
-  @if (userNumbers().length > 0) {
+  @if (checked().rows.length > 0) {
   <div class="user-numbers">
     <h3>Your Numbers:</h3>
 
-    @for (row of userNumberRows(); track $index; let rowIndex = $index) {
-    <div class="data-row" [class.matches-info]="hasHighestMatches(rowIndex)" [class.editing]="isEditingRow(rowIndex)">
-      <div class="number-row">
-        <div class="row-label">{{ rowLabels()[rowIndex] }}</div>
-        @if (isEditingRow(rowIndex)) {
-          @for (num of row; track num; let numIndex = $index) {
-          <div class="number-badge" [class.matching]="isMatching(num)">
-            {{ num }}
-            <button class="edit-number" (click)="editNumber(rowIndex, numIndex)">✎</button>
-          </div>
+    @for (row of checked().rows; track $index; let rowIndex = $index) {
+    <div class="data-row" [class.matches-info]="row.best">
+      <div class="number-row" [class.editing]="editingRow() === rowIndex">
+        <div class="row-label">{{ row.label }}</div>
+        @for (number of row.numbers; track $index; let position = $index) {
+        <div class="number-badge" [class.matching]="number.matching">
+          {{ number.value }}
+          @if (editingRow() === rowIndex) {
+          <button
+            #pencil
+            class="edit-number"
+            [attr.aria-label]="'Change ' + number.value + ' in row ' + row.label"
+            (click)="editNumber(rowIndex, position)"
+          >✎</button>
           }
-        } @else {
-          @for (num of row; track num) {
-          <div class="number-badge" [class.matching]="isMatching(num)">
-            {{ num }}
-          </div>
-          }
+        </div>
         }
       </div>
       <div class="row-actions">
-        @if (!isEditingRow(rowIndex)) {
-        <button class="edit-button" (click)="editRow(rowIndex)">Edit</button>
+        @if (editingRow() !== rowIndex) {
+        <button #editButton class="edit-button" (click)="editRow(rowIndex)">Edit</button>
         <button class="delete-button" (click)="deleteRow(rowIndex)">Delete</button>
         } @else {
         <button class="done-button" (click)="finishEditing()">Done</button>
         }
       </div>
     </div>
-    } @if (highestMatchCount() > 0) {
+    } @if (checked().bestMatches > 0) {
     <div class="matches-info">
-      <p>Your highest matching row has {{ highestMatchCount() }} matching numbers!</p>
+      <p>Your highest matching row has {{ checked().bestMatches }} matching numbers!</p>
     </div>
     }
 

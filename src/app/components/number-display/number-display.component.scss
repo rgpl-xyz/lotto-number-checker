@@ -66,11 +66,11 @@
     padding: 5px;
     border-radius: 4px;
 
+    // The same size as any other row, so nothing moves when editing starts.
     &.editing {
       background-color: #f5f5f5;
       border: 1px dashed #ccc;
-      padding: 10px;
-      margin-left: 5px !important;
+      padding: 4px;
     }
 
     .row-label {
@@ -207,11 +207,12 @@
   
   .data-row {
     flex-direction: column;
+    // One line, so every part is as wide as the row and not as its widest part.
+    flex-wrap: nowrap;
     
     .number-row {
       margin-bottom: 10px;
       overflow-x: auto;
-      width: 100%;
       padding-bottom: 5px;
     }
     

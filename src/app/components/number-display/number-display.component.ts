@@ -1,4 +1,3 @@
-
 import {
   Component,
   computed,
@@ -8,11 +7,23 @@ import {
   DOCUMENT,
   ChangeDetectionStrategy,
   ElementRef,
-  viewChild
+  Injector,
+  afterNextRender,
+  viewChild,
+  viewChildren
 } from '@angular/core';
 import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games';
 import { Draw } from '../../lotto/draw';
+import {
+  EMPTY_TICKET,
+  Ticket,
+  addNumber,
+  checkTicket,
+  deleteRow,
+  replaceNumber,
+} from '../../lotto/ticket';
 
+/** The player's ticket: an entry field, the rows checked against the draw, and row editing. */
 @Component({
   selector: 'app-number-display',
   imports: [],
@@ -22,198 +33,96 @@ import { Draw } from '../../lotto/draw';
 })
 export class NumberDisplayComponent {
   readonly winningNumbers = input<Draw | null>(null);
-  readonly inputNumber = signal<number | undefined>(undefined);
-  readonly userNumbers = signal<number[]>([]);
-  readonly editingRowIndex = signal<number | null>(null);
-
-  private readonly document = inject(DOCUMENT);
-  private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput');
-
-  matchingNumbers = computed(() => {
-    if (!this.winningNumbers()?.length) return [];
-
-    return this.userNumbers().filter((num) => this.isMatching(num));
-  });
-
-  userNumberRows = computed(() => {
-    const numbers = this.userNumbers();
-    const rows: number[][] = [];
-
-    for (let i = 0; i < numbers.length; i += 6) {
-      rows.push(numbers.slice(i, i + 6));
-    }
-
-    return rows;
-  });
-
-  readonly rowLabels = computed(() => {
-    const rows = this.userNumberRows();
-    return rows.map((_, index) => this.generateRowLabel(index));
-  });
-
-  readonly matchesPerRow = computed(() => {
-    if (!this.winningNumbers()?.length) return [];
-
-    return this.userNumberRows().map(
-      (row) => row.filter((num) => this.isMatching(num)).length
-    );
-  });
-
-  readonly highestMatchCount = computed(() => {
-    const matches = this.matchesPerRow();
-    return matches.length > 0 ? Math.max(...matches) : 0;
-  });
-
-  readonly rowsWithHighestMatches = computed(() => {
-    const highest = this.highestMatchCount();
-    return this.matchesPerRow().map((count) => count === highest && count > 0);
-  });
 
   protected readonly lowest = LOWEST_NUMBER;
   protected readonly highest = HIGHEST_NUMBER;
 
-  readonly isInputValid = computed(() => isLottoNumber(this.inputNumber()));
+  protected readonly inputNumber = signal<number | undefined>(undefined);
+  protected readonly ticket = signal<Ticket>(EMPTY_TICKET);
+  /** The row whose numbers can be changed, if any. */
+  protected readonly editingRow = signal<number | null>(null);
 
-  /** Takes the entry field's text; an empty field means no number. */
-  setNumberInput(value: string): void {
+  protected readonly checked = computed(() => checkTicket(this.ticket(), this.winningNumbers()));
+  protected readonly isInputValid = computed(() => isLottoNumber(this.inputNumber()));
+
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+  private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput');
+  private readonly pencils = viewChildren<ElementRef<HTMLButtonElement>>('pencil');
+  private readonly editButtons = viewChildren<ElementRef<HTMLButtonElement>>('editButton');
+
+  /**
+   * Takes the entry field's text. A number with as many digits as the highest one
+   * can't grow any further, so it is added as soon as it is typed.
+   */
+  protected setNumberInput(value: string): void {
     this.inputNumber.set(value === '' ? undefined : Number(value));
 
-    if (this.isInputValid() && `${value}`.length > 1) {
+    if (this.isInputValid() && value.length >= String(HIGHEST_NUMBER).length) {
       this.addNumber();
     }
   }
 
-  addNumber(): void {
-    const num = this.inputNumber();
+  protected addNumber(): void {
+    const value = this.inputNumber();
+    if (!isLottoNumber(value)) return;
 
-    if (isLottoNumber(num)) {
-      const numValue = Number(num);
-      const numbers = this.userNumbers();
+    this.ticket.update((ticket) => addNumber(ticket, value));
+    this.inputNumber.set(undefined);
+    // [value] only writes to the field when its value changes between checks. A number pasted in one go goes
+    // undefined -> 17 -> undefined within one event, so the binding never sees a change: clear the field here.
+    const field = this.numberInput()?.nativeElement;
+    if (field) field.value = '';
+  }
 
-      // Get the current row's numbers (last row or partial row)
-      const rowSize = 6;
-      const lastRowStartIndex = Math.floor(numbers.length / rowSize) * rowSize;
-      const currentRowNumbers = numbers.slice(lastRowStartIndex);
+  protected clearNumbers(): void {
+    this.ticket.set(EMPTY_TICKET);
+    this.editingRow.set(null);
+  }
 
-      // Only check duplicates within the current row
-      const isDuplicateInCurrentRow = currentRowNumbers.includes(numValue);
+  protected editRow(rowIndex: number): void {
+    this.editingRow.set(rowIndex);
+    // Edit gives way to the pencils, so focus moves to the first of them.
+    afterNextRender(() => this.pencils()[0]?.nativeElement.focus(), { injector: this.injector });
+  }
 
-      // Add number only if it's not a duplicate in current row
-      // Or if the current row is full (start a new row)
-      if (!isDuplicateInCurrentRow || currentRowNumbers.length >= rowSize) {
-        this.userNumbers.update((nums) => [...nums, numValue]);
-      }
-
-      this.inputNumber.set(undefined);
-      // [value] only writes to the field when its value changes between checks. A number pasted in one go goes
-      // undefined -> 17 -> undefined within one event, so the binding never sees a change: clear the field here.
-      const field = this.numberInput()?.nativeElement;
-      if (field) field.value = '';
+  protected finishEditing(): void {
+    const rowIndex = this.editingRow();
+    this.editingRow.set(null);
+    if (rowIndex !== null) {
+      // Done gives way to Edit again, so focus goes back to that row's Edit.
+      afterNextRender(() => this.editButtons()[rowIndex]?.nativeElement.focus(), {
+        injector: this.injector,
+      });
     }
   }
 
-  clearNumbers(): void {
-    this.userNumbers.set([]);
-  }
-
-  isMatching(num: number): boolean {
-    return this.winningNumbers()?.includes(num) ?? false;
-  }
-
-  hasHighestMatches(rowIndex: number): boolean {
-    return this.rowsWithHighestMatches()[rowIndex] || false;
-  }
-
-  editRow(rowIndex: number): void {
-    this.editingRowIndex.set(rowIndex);
-  }
-
-  deleteRow(rowIndex: number): void {
-    const rowsPerPage = 6;
-    const startIndex = rowIndex * rowsPerPage;
-
-    this.userNumbers.update((numbers) => {
-      const newNumbers = [...numbers];
-      newNumbers.splice(
-        startIndex,
-        Math.min(rowsPerPage, newNumbers.length - startIndex)
-      );
-      return newNumbers;
-    });
-  }
-
-  deleteNumber(rowIndex: number, numberIndex: number): void {
-    const actualIndex = rowIndex * 6 + numberIndex;
-    this.userNumbers.update((numbers) => {
-      const newNumbers = [...numbers];
-      newNumbers.splice(actualIndex, 1);
-      return newNumbers;
-    });
-  }
-
-  isEditingRow(rowIndex: number): boolean {
-    return this.editingRowIndex() === rowIndex;
-  }
-
-  editNumber(rowIndex: number, numberIndex: number): void {
-    const actualIndex = rowIndex * 6 + numberIndex;
-    const currentValue = this.userNumbers()[actualIndex];
-
-    // Use prompt dialog for editing
-    const newValueStr = this.document.defaultView?.prompt(
-      'Edit number:',
-      currentValue.toString()
-    );
-    if (!newValueStr) return; // User cancelled
-
-    const newValue = parseInt(newValueStr, 10);
-
-    // Validate input
-    if (!isLottoNumber(newValue)) {
-      alert(`Please enter a valid number between ${LOWEST_NUMBER} and ${HIGHEST_NUMBER}`);
-      return;
+  protected deleteRow(rowIndex: number): void {
+    this.ticket.update((ticket) => deleteRow(ticket, rowIndex));
+    // Keep editing the same row: it moves up when a row above it goes.
+    const editing = this.editingRow();
+    if (editing === rowIndex) {
+      this.editingRow.set(null);
+    } else if (editing !== null && editing > rowIndex) {
+      this.editingRow.set(editing - 1);
     }
+  }
 
-    // Check for duplicates in the same row
-    const rowStartIndex = rowIndex * 6;
-    const rowEndIndex = Math.min(rowStartIndex + 6, this.userNumbers().length);
-    const rowNumbers = this.userNumbers().slice(rowStartIndex, rowEndIndex);
+  protected editNumber(rowIndex: number, position: number): void {
+    const view = this.document.defaultView;
+    const current = this.ticket()[rowIndex][position];
+    const answer = view?.prompt('Edit number:', String(current));
+    if (!answer) return; // cancelled
 
-    // Check if this would create a duplicate in the row
-    const wouldCreateDuplicate = rowNumbers.some((n, i) => {
-      // Skip comparing with the number we're editing
-      if (rowStartIndex + i === actualIndex) return false;
-      return n === newValue;
-    });
-
-    if (wouldCreateDuplicate) {
-      this.document.defaultView?.alert(
-        'This number already exists in the current row'
+    const result = replaceNumber(this.ticket(), rowIndex, position, Number(answer));
+    if ('problem' in result) {
+      view?.alert(
+        result.problem === 'duplicate'
+          ? 'This number already exists in the current row'
+          : `Please enter a valid number between ${LOWEST_NUMBER} and ${HIGHEST_NUMBER}`
       );
       return;
     }
-
-    // Update the number
-    this.userNumbers.update((numbers) => {
-      const newNumbers = [...numbers];
-      newNumbers[actualIndex] = newValue;
-      return newNumbers;
-    });
-  }
-
-  finishEditing(): void {
-    this.editingRowIndex.set(null);
-  }
-
-  // Generate a row label (A-Z, then A1-Z1, A2-Z2, etc.)
-  private generateRowLabel(index: number): string {
-    const letterCount = 26; // A-Z
-    const baseCharCode = 'A'.charCodeAt(0);
-
-    const cycleNumber = Math.floor(index / letterCount);
-    const letterIndex = index % letterCount;
-    const letter = String.fromCharCode(baseCharCode + letterIndex);
-
-    return cycleNumber === 0 ? letter : `${letter}${cycleNumber}`;
+    this.ticket.set(result.ticket);
   }
 }
