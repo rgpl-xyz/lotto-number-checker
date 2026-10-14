@@ -12,6 +12,7 @@ import {
   viewChild,
   viewChildren
 } from '@angular/core';
+import { NumberBallComponent } from '../number-ball/number-ball.component';
 import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games';
 import { Draw } from '../../lotto/draw';
 import {
@@ -26,7 +27,7 @@ import {
 /** The player's ticket: an entry field, the rows checked against the draw, and row editing. */
 @Component({
   selector: 'app-number-display',
-  imports: [],
+  imports: [NumberBallComponent],
   templateUrl: './number-display.component.html',
   styleUrl: './number-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

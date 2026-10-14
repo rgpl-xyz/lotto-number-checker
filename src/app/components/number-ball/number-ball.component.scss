@@ -1,0 +1,43 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  // Round at any size: in a row short of room the ball shrinks instead of squashing.
+  aspect-ratio: 1;
+  min-width: 0;
+  align-self: center;
+  border-radius: 50%;
+  background-color: var(--light-gray);
+  font-weight: bold;
+  position: relative;
+}
+
+:host(.winning) {
+  background-color: var(--winning-color);
+  color: white;
+}
+
+:host(.matching) {
+  background-color: var(--matching-color);
+  color: black;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  :host {
+    width: 35px;
+    font-size: 14px;
+  }
+}

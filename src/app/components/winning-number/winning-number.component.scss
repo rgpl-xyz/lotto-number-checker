@@ -13,20 +13,6 @@
   margin-bottom: 15px;
 }
 
-.number-badge {
-  @extend %number-badge;
-
-  &.winning {
-    background-color: var(--winning-color);
-    color: white;
-  }
-
-  &.matching {
-    background-color: var(--matching-color);
-    color: black;
-  }
-}
-
 .search {
   font-size: 14px;
   color: var(--text-color);

@@ -2,12 +2,13 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { WinningInputComponent } from '../winning-input/winning-input.component';
 import { NumberDisplayComponent } from '../number-display/number-display.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
+import { NumberBallComponent } from '../number-ball/number-ball.component';
 import { FEATURE_FLAGS } from '../../feature-flags';
 import { Draw } from '../../lotto/draw';
 
 @Component({
   selector: 'app-winning-number',
-  imports: [WinningInputComponent, NumberDisplayComponent, SearchResultsComponent],
+  imports: [WinningInputComponent, NumberDisplayComponent, SearchResultsComponent, NumberBallComponent],
   templateUrl: './winning-number.component.html',
   styleUrl: './winning-number.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -37,8 +37,7 @@
       <div class="number-row" [class.editing]="editingRow() === rowIndex">
         <div class="row-label">{{ row.label }}</div>
         @for (number of row.numbers; track $index; let position = $index) {
-        <div class="number-badge" [class.matching]="number.matching">
-          {{ number.value }}
+        <app-number-ball [value]="number.value" [look]="number.matching ? 'matching' : 'plain'">
           @if (editingRow() === rowIndex) {
           <button
             #pencil
@@ -47,7 +46,7 @@
             (click)="editNumber(rowIndex, position)"
           >✎</button>
           }
-        </div>
+        </app-number-ball>
         }
       </div>
       <div class="row-actions">

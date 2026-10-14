@@ -31,7 +31,7 @@ const winningField = (element: HTMLElement, index: number) =>
   element.querySelector<HTMLInputElement>(`#number-input-${index}`)!;
 
 const shownWinningNumbers = (element: HTMLElement) =>
-  Array.from(element.querySelectorAll('.winning-numbers-display .number-badge')).map(
+  Array.from(element.querySelectorAll('.winning-numbers-display app-number-ball')).map(
     (ball) => ball.textContent?.trim()
   );
 

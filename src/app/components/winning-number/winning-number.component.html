@@ -26,7 +26,7 @@
 
       <div class="number-list">
         @for (num of winningNumbers() ?? []; track num) {
-        <div class="number-badge winning">{{ num }}</div>
+        <app-number-ball [value]="num" look="winning" />
         }
         <button class="edit-button" (click)="editWinningNumbers()">Edit</button>
       </div>

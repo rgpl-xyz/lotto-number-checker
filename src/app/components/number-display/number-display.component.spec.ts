@@ -14,7 +14,7 @@ describe('NumberDisplayComponent', () => {
   const rows = () => Array.from(element.querySelectorAll<HTMLElement>('.data-row'));
   const rowNumbers = () =>
     rows().map((row) =>
-      Array.from(row.querySelectorAll('.number-badge')).map((ball) =>
+      Array.from(row.querySelectorAll('app-number-ball')).map((ball) =>
         Number(ball.firstChild?.textContent?.trim())
       )
     );
@@ -110,8 +110,8 @@ describe('NumberDisplayComponent', () => {
     await addNumbers(1, 2, 3, 10, 11, 12, 21, 22, 23, 24, 25, 26, 1, 2, 3, 4, 5, 30);
 
     const matching = rows().map((row) =>
-      Array.from(row.querySelectorAll('.number-badge.matching')).map((ball) =>
-        Number(ball.textContent?.trim())
+      Array.from(row.querySelectorAll('app-number-ball.matching')).map((ball) =>
+        Number(ball.firstChild?.textContent?.trim())
       )
     );
     expect(matching).toEqual([[1, 2, 3], [], [1, 2, 3, 4, 5]]);
