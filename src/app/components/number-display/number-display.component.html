@@ -10,12 +10,12 @@
         #numberInput
         id="number-input"
         type="number"
-        min="1"
-        max="59"
+        [min]="lowest"
+        [max]="highest"
         [value]="inputNumber()"
         (input)="setNumberInput($any($event.target).value)"
         (keydown.enter)="addNumber()"
-        placeholder="Enter a number (1-59)"
+        placeholder="Enter a number ({{ lowest }}-{{ highest }})"
         class="number-input"
       />
       <button

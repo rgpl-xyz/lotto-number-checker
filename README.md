@@ -6,7 +6,7 @@ https://lotto.app.rgpl.xyz
 
 ![Three rows checked against a draw](docs/checker.png)
 
-Enter the six winning numbers, then add your numbers one at a time; they fill rows of six. Rows can be edited or deleted. Numbers go from 1 to 59, which covers the PCSO 6/42, 6/45, 6/49, 6/55 and 6/58 games.
+Enter the six winning numbers, then add your numbers one at a time; they fill rows of six. Rows can be edited or deleted. Numbers go from 1 to 58, which covers the PCSO 6/42, 6/45, 6/49, 6/55 and 6/58 games.
 
 Not affiliated with PCSO. Check real results through PCSO's own channels.
 

@@ -11,6 +11,7 @@ import {
   ElementRef,
   viewChild
 } from '@angular/core';
+import { HIGHEST_NUMBER, LOWEST_NUMBER, isLottoNumber } from '../../lotto/games';
 
 @Component({
   selector: 'app-number-display',
@@ -71,16 +72,14 @@ export class NumberDisplayComponent {
     return this.matchesPerRow().map((count) => count === highest && count > 0);
   });
 
-  readonly isInputValid = computed(() => {
-    const value = this.inputNumber();
-    if (!value) return false;
+  protected readonly lowest = LOWEST_NUMBER;
+  protected readonly highest = HIGHEST_NUMBER;
 
-    const num = value;
-    return !isNaN(num) && num >= 1 && num <= 59;
-  });
+  readonly isInputValid = computed(() => isLottoNumber(this.inputNumber()));
 
-  setNumberInput(value: number): void {
-    this.inputNumber.set(value);
+  /** Takes the entry field's text; an empty field means no number. */
+  setNumberInput(value: string): void {
+    this.inputNumber.set(value === '' ? undefined : Number(value));
 
     if (this.isInputValid() && `${value}`.length > 1) {
       this.addNumber();
@@ -89,9 +88,8 @@ export class NumberDisplayComponent {
 
   addNumber(): void {
     const num = this.inputNumber();
-    if (!num) return;
 
-    if (!isNaN(num) && num >= 1 && num <= 59) {
+    if (isLottoNumber(num)) {
       const numValue = Number(num);
       const numbers = this.userNumbers();
 
@@ -176,8 +174,8 @@ export class NumberDisplayComponent {
     const newValue = parseInt(newValueStr, 10);
 
     // Validate input
-    if (isNaN(newValue) || newValue < 1 || newValue > 59) {
-      alert('Please enter a valid number between 1 and 59');
+    if (!isLottoNumber(newValue)) {
+      alert(`Please enter a valid number between ${LOWEST_NUMBER} and ${HIGHEST_NUMBER}`);
       return;
     }
 

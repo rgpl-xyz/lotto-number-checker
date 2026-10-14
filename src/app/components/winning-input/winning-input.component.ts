@@ -15,10 +15,12 @@ import {
 } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { noDuplicateNumbersValidator } from './winning-input.validator';
-
-const MIN_NUMBER = 1;
-const MAX_NUMBER = 59;
-const NUM_COUNT = 6;
+import {
+  HIGHEST_NUMBER,
+  LOWEST_NUMBER,
+  NUMBERS_PER_DRAW,
+  isLottoNumber,
+} from '../../lotto/games';
 
 @Component({
   selector: 'app-winning-input',
@@ -38,12 +40,12 @@ export class WinningInputComponent {
   readonly form = this.fb.group({
     numbers: this.fb.array(
       Array.from(
-        { length: NUM_COUNT },
+        { length: NUMBERS_PER_DRAW },
         () =>
           new FormControl<number | null>(null, [
             Validators.required,
-            Validators.min(MIN_NUMBER),
-            Validators.max(MAX_NUMBER),
+            Validators.min(LOWEST_NUMBER),
+            Validators.max(HIGHEST_NUMBER),
           ])
       ),
       { validators: [noDuplicateNumbersValidator] }
@@ -54,12 +56,14 @@ export class WinningInputComponent {
     return this.form.get('numbers') as FormArray<FormControl<number | null>>;
   }
 
-  readonly controlIndices = [0, 1, 2, 3, 4, 5] as const;
+  readonly controlIndices = Array.from({ length: NUMBERS_PER_DRAW }, (_, i) => i);
+  protected readonly lowest = LOWEST_NUMBER;
+  protected readonly highest = HIGHEST_NUMBER;
 
   constructor() {
     effect(() => {
       const numbers = this.numbersToEdit();
-      if (numbers?.length === NUM_COUNT) {
+      if (numbers?.length === NUMBERS_PER_DRAW) {
         this.numbers.patchValue([...numbers]);
       }
     });
@@ -74,16 +78,16 @@ export class WinningInputComponent {
       .split(/[-,;\s]+/)
       .filter((s) => s.length > 0)
       .map((s) => parseInt(s, 10))
-      .filter((num) => !isNaN(num) && num >= MIN_NUMBER && num <= MAX_NUMBER)
-      .slice(0, NUM_COUNT);
+      .filter(isLottoNumber)
+      .slice(0, NUMBERS_PER_DRAW);
 
     if (parsed.length > 0) {
       const values: (number | null)[] = [...parsed];
-      while (values.length < NUM_COUNT) {
+      while (values.length < NUMBERS_PER_DRAW) {
         values.push(null);
       }
       this.numbers.patchValue(values);
-      if (parsed.length === NUM_COUNT && this.form.valid) {
+      if (parsed.length === NUMBERS_PER_DRAW && this.form.valid) {
         this.submitWinningNumbers();
       }
     }
@@ -95,7 +99,7 @@ export class WinningInputComponent {
       const numbers = values.filter(
         (v): v is number => v != null && !isNaN(v)
       ) as number[];
-      if (numbers.length === NUM_COUNT) {
+      if (numbers.length === NUMBERS_PER_DRAW) {
         this.winningNumbersSet.emit(numbers);
       }
     }
@@ -104,7 +108,7 @@ export class WinningInputComponent {
   handleKeyDown(event: KeyboardEvent, index: number): void {
     if (event.key !== 'Enter') return;
     event.preventDefault();
-    if (index < NUM_COUNT - 1) {
+    if (index < NUMBERS_PER_DRAW - 1) {
       const nextInput = this.document.getElementById(
         `number-input-${index + 1}`
       );

@@ -2,7 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, of, map, catchError, finalize, tap } from 'rxjs';
 import { signal, computed } from '@angular/core';
-import { GAME_SELECTION_OPTIONS, LottoResult } from '../models/lotto.model';
+import { LottoResult } from '../models/lotto.model';
+import { gameNamed } from '../lotto/games';
 
 @Injectable({
   providedIn: 'root',
@@ -94,14 +95,8 @@ export class LottoService {
     const rows = doc.querySelectorAll(
       '#cphContainer_cpContent_GridView1 tr:not(:first-child)'
     );
-    const supportedGames = GAME_SELECTION_OPTIONS.map((game) => game.label);
-
     return Array.from(rows)
-      .filter((row) =>
-        supportedGames.includes(
-          row.firstElementChild?.textContent?.trim() || ''
-        )
-      )
+      .filter((row) => gameNamed(row.firstElementChild?.textContent?.trim() || ''))
       .map((row) => {
         const cells = row.querySelectorAll('td');
         const game = cells[0].textContent?.trim() || '';

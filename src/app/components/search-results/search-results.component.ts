@@ -13,10 +13,7 @@ import { GameSelectionComponent } from '../game-selection/game-selection.compone
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { LottoService } from '../../services/lotto.service';
-import {
-  GAME_SELECTION_OPTIONS,
-  GameSelectionOption,
-} from '../../models/lotto.model';
+import { LottoGame } from '../../lotto/games';
 
 @Component({
   selector: 'app-search-results',
@@ -28,9 +25,7 @@ import {
 export class SearchResultsComponent implements OnInit {
   readonly winningNumbersSet = output<number[]>();
 
-  readonly selectedGame = signal<GameSelectionOption>(
-    GAME_SELECTION_OPTIONS[0]
-  );
+  readonly selectedGame = signal<LottoGame | null>(null);
 
   readonly lottoService = inject(LottoService);
 

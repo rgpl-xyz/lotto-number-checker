@@ -173,8 +173,11 @@ describe('NumberDisplayComponent', () => {
     component.inputNumber.set(0);
     expect(component.isInputValid()).toBe(false);
     
+    component.inputNumber.set(58);
+    expect(component.isInputValid()).toBe(true);  // 1-58 range
+
     component.inputNumber.set(59);
-    expect(component.isInputValid()).toBe(true);  // 1-59 range
+    expect(component.isInputValid()).toBe(false);
     
     component.inputNumber.set(100);
     expect(component.isInputValid()).toBe(false);
@@ -202,11 +205,11 @@ describe('NumberDisplayComponent', () => {
     component.addNumber();
     component.inputNumber.set(50);
     component.addNumber();
-    component.inputNumber.set(59);
+    component.inputNumber.set(58);
     component.addNumber();
     
     // Should have 6 numbers now
-    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 59]);
+    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 58]);
   });
 
   it('should not add duplicate numbers in the same row', () => {
@@ -221,7 +224,7 @@ describe('NumberDisplayComponent', () => {
     expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50]);
     
     // Add number to complete the row
-    component.inputNumber.set(59);
+    component.inputNumber.set(58);
     component.addNumber();
     
     // Now duplicates are allowed in a new row
@@ -229,7 +232,7 @@ describe('NumberDisplayComponent', () => {
     component.addNumber();
     
     // Now we should have 7 numbers
-    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 59, 10]);
+    expect(component.userNumbers()).toEqual([10, 20, 30, 40, 50, 58, 10]);
   });
 
   it('should clear all user numbers', () => {

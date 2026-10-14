@@ -1,5 +1,5 @@
 <div class="winning-input-container" [formGroup]="form">
-  <p class="instruction">Enter or paste 6 numbers between 1 and 59:</p>
+  <p class="instruction">Enter or paste {{ controlIndices.length }} numbers between {{ lowest }} and {{ highest }}:</p>
 
   <div class="number-inputs" formArrayName="numbers">
     @for (i of controlIndices; track i) {
@@ -9,8 +9,8 @@
         >
         <input
           type="number"
-          min="1"
-          max="59"
+          [min]="lowest"
+          [max]="highest"
           [id]="'number-input-' + i"
           [formControlName]="i"
           (paste)="parseInputString($event)"

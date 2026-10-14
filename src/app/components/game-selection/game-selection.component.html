@@ -1,5 +1,6 @@
-<select name="select-game" id="select-game" (change)="onGameChange($event)">
-  @for (option of gameOptions(); track option.value) {
-    <option [value]="option.value">{{ option.label }}</option>
+<select name="select-game" id="select-game" aria-label="Game" (change)="onGameChange($event)">
+  <option value="" [selected]="!selectedGame()">All Games</option>
+  @for (game of games; track game.name) {
+    <option [value]="game.name" [selected]="selectedGame()?.name === game.name">{{ game.name }}</option>
   }
 </select>

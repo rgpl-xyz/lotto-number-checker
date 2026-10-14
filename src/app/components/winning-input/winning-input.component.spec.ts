@@ -62,20 +62,20 @@ describe('WinningInputComponent', () => {
   });
 
   it('should mark as invalid if numbers out of range', () => {
-    component.numbers.patchValue([10, 20, 30, 40, 60, 50]); // 60 above 59
+    component.numbers.patchValue([10, 20, 30, 40, 59, 50]); // 59 above 58
     expect(component.form.valid).toBe(false);
   });
 
   it('should submit winning numbers when valid', () => {
     vi.spyOn(component.winningNumbersSet, 'emit');
 
-    component.numbers.patchValue([10, 20, 30, 40, 50, 59]);
+    component.numbers.patchValue([10, 20, 30, 40, 50, 58]);
     expect(component.form.valid).toBe(true);
 
     component.submitWinningNumbers();
 
     expect(component.winningNumbersSet.emit).toHaveBeenCalledWith([
-      10, 20, 30, 40, 50, 59,
+      10, 20, 30, 40, 50, 58,
     ]);
   });
 
@@ -117,7 +117,7 @@ describe('WinningInputComponent', () => {
   it('should submit numbers when Enter pressed on last input and valid', () => {
     vi.spyOn(component, 'submitWinningNumbers');
 
-    component.numbers.patchValue([10, 20, 30, 40, 50, 59]);
+    component.numbers.patchValue([10, 20, 30, 40, 50, 58]);
 
     const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
     vi.spyOn(enterEvent, 'preventDefault');
