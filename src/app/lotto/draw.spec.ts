@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawProblem, numbersIn, toDraw } from './draw';
+import { drawProblem, entryProblem, numbersIn, toDraw } from './draw';
 import { gameNamed } from './games';
 
 describe('toDraw', () => {
@@ -81,5 +81,28 @@ describe('numbersIn', () => {
       5, 12, 23, 34, 45, 56,
     ]);
     expect(numbersIn('1e5 3.7 12abc 7')).toEqual([7]);
+  });
+});
+
+describe('entryProblem', () => {
+  it('has nothing to say about numbers that could still become a draw', () => {
+    expect(entryProblem([4, 8, null, null, null, null])).toBeNull();
+    expect(entryProblem([4, 8, 15, 16, 23, 42])).toBeNull();
+  });
+
+  it('names a number no game draws, and where it is', () => {
+    expect(entryProblem([4, 59, null])).toEqual({
+      message: '59 is too high: numbers go from 1 to 58.',
+      positions: [1],
+    });
+  });
+
+  it('names a number entered more than once, and every place it is', () => {
+    expect(entryProblem([16, 3, 16])).toEqual({ message: '16 is entered twice.', positions: [0, 2] });
+    expect(entryProblem([7, 7, 7])?.message).toBe('7 is entered 3 times.');
+  });
+
+  it('puts a number out of range before a repeat', () => {
+    expect(entryProblem([5, 5, 0])?.positions).toEqual([2]);
   });
 });

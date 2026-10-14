@@ -13,6 +13,9 @@
           [max]="highest"
           [id]="'number-input-' + i"
           [formControlName]="i"
+          appDigitsOnly
+          [attr.aria-invalid]="isFaulty(i) || null"
+          [attr.aria-describedby]="isFaulty(i) ? 'winning-problem' : null"
           (paste)="parseInputString($event)"
           (keydown)="handleKeyDown($event, i)"
           class="number-input"
@@ -20,6 +23,8 @@
       </div>
     }
   </div>
+
+  <p id="winning-problem" class="field-problem" aria-live="polite">{{ problem()?.message }}</p>
 
   <button
     class="submit-button"

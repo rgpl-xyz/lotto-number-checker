@@ -58,3 +58,21 @@ test('Edit brings the winning numbers back to change them', async ({ page }) => 
 
   await expect.poll(() => shownNumbers(page)).toEqual([4, 8, 15, 16, 23, 43]);
 });
+
+test('a winning number out of range or entered twice is named under the slots', async ({ page }) => {
+  await winningField(page, 0).fill('59');
+  await expect(page.getByText('59 is too high: numbers go from 1 to 58.')).toBeVisible();
+  await expect(winningField(page, 0)).toHaveAttribute('aria-invalid', 'true');
+
+  await winningField(page, 0).fill('4');
+  await winningField(page, 1).fill('4');
+  await winningField(page, 1).press('Tab');
+  await expect(page.getByText('4 is entered twice.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Set Winning Numbers' })).toBeDisabled();
+});
+
+test('only digits can be typed into a slot', async ({ page }) => {
+  await winningField(page, 0).pressSequentially('e5+.');
+
+  await expect(winningField(page, 0)).toHaveValue('5');
+});

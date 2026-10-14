@@ -13,7 +13,11 @@
         [min]="lowest"
         [max]="highest"
         [value]="inputNumber() ?? ''"
+        appDigitsOnly
+        [attr.aria-invalid]="entryMessage() ? true : null"
+        [attr.aria-describedby]="entryMessage() ? 'entry-problem' : null"
         (input)="setNumberInput($any($event.target).value)"
+        (blur)="entryLeft.set(true)"
         (keydown.enter)="addNumber()"
         placeholder="Enter a number ({{ lowest }}-{{ highest }})"
         class="number-input"
@@ -27,6 +31,8 @@
       </button>
     </div>
   </div>
+
+  <p id="entry-problem" class="field-problem" aria-live="polite">{{ entryMessage() }}</p>
 
   @if (checked().rows.length > 0) {
   <div class="user-numbers">

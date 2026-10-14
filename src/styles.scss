@@ -18,6 +18,11 @@
   --gold: #ffc107;
   --gold-tint: #fff3c4;
 
+  // For errors only, the one colour outside the duotone: the status-danger text and
+  // surface of @rgpl/tokens (light theme), so errors look the same across rgpl's sites.
+  --error-text: #641723;
+  --error-surface: #feebec;
+
   // The ball colours, by what they mean.
   --winning-color: var(--purple);
   --matching-color: var(--gold);
@@ -80,6 +85,19 @@ input[type='number']::-webkit-inner-spin-button {
 // Every button is a purple pill unless it says otherwise.
 button {
   @extend %pill;
+}
+
+// A message under a field saying what is wrong with what was typed. Always in the page,
+// so screen readers announce it as it changes; empty, it takes no room.
+.field-problem {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--error-text);
+
+  &:empty {
+    margin: 0;
+  }
 }
 
 .visually-hidden {

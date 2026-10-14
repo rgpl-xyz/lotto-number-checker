@@ -37,3 +37,12 @@ export function isLottoNumber(value: number | null | undefined): value is number
 export function gameNamed(name: string): LottoGame | undefined {
   return LOTTO_GAMES.find((game) => game.name === name);
 }
+
+/** Says what is wrong with a number no game draws, for the person who typed it. */
+export function rangeMessage(value: number): string {
+  if (!Number.isInteger(value)) {
+    return `${value} is not a whole number.`;
+  }
+  const side = value > HIGHEST_NUMBER ? 'too high' : 'too low';
+  return `${value} is ${side}: numbers go from ${LOWEST_NUMBER} to ${HIGHEST_NUMBER}.`;
+}

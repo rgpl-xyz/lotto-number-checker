@@ -56,3 +56,29 @@ test('Clear All empties the ticket', async ({ page }) => {
   await expect(page.getByText(/^Best row/)).toBeHidden();
   await expect(page.locator('.data-row')).toHaveCount(0);
 });
+
+test('a number out of range is named under the entry', async ({ page }) => {
+  const field = page.getByLabel('Enter your numbers');
+  await field.fill('59');
+
+  await expect(page.getByText('59 is too high: numbers go from 1 to 58.')).toBeVisible();
+  await expect(field).toHaveAttribute('aria-invalid', 'true');
+});
+
+test('a number already in the row is named and stays in the entry', async ({ page }) => {
+  await addNumbers(page, [7]);
+  const field = page.getByLabel('Enter your numbers');
+  await field.fill('7');
+  await field.press('Enter');
+
+  await expect(page.getByText('7 is already in row A.')).toBeVisible();
+  await expect(field).toHaveValue('7');
+  await expect.poll(() => ballNumbers(ticketRow(page, 'A'))).toEqual([7]);
+});
+
+test('only digits can be typed into the entry', async ({ page }) => {
+  const field = page.getByLabel('Enter your numbers');
+  await field.pressSequentially('e4');
+
+  await expect(field).toHaveValue('4');
+});

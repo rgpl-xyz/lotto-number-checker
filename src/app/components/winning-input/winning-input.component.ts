@@ -6,7 +6,10 @@ import {
   inject,
   ChangeDetectionStrategy,
   DOCUMENT,
+  computed,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { merge } from 'rxjs';
 import {
   FormBuilder,
   FormArray,
@@ -15,7 +18,8 @@ import {
 } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { differentNumbers, lottoNumber } from './winning-input.validator';
-import { Draw, numbersIn, toDraw } from '../../lotto/draw';
+import { Draw, entryProblem, numbersIn, toDraw } from '../../lotto/draw';
+import { DigitsOnlyDirective } from '../digits-only.directive';
 import {
   HIGHEST_NUMBER,
   LOWEST_NUMBER,
@@ -25,7 +29,7 @@ import {
 
 @Component({
   selector: 'app-winning-input',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DigitsOnlyDirective],
   templateUrl: './winning-input.component.html',
   styleUrl: './winning-input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +58,28 @@ export class WinningInputComponent {
   }
 
   readonly controlIndices = Array.from({ length: NUMBERS_PER_DRAW }, (_, i) => i);
+
+  /**
+   * Every change to each field, values and touched alike, for the problem below. The
+   * fields' own events: the form reports touched only the first time any field is left.
+   */
+  private readonly fieldEvents = toSignal(merge(...this.numbers.controls.map((field) => field.events)));
+
+  /**
+   * What to tell the person typing, naming the number at fault. A number counts once its
+   * field has two digits or has been left, so the 0 on the way to "05" isn't flagged.
+   */
+  protected readonly problem = computed(() => {
+    this.fieldEvents();
+    const settled = this.numbers.controls.map((field) =>
+      field.value != null && (field.touched || String(field.value).length >= 2) ? field.value : null
+    );
+    return entryProblem(settled);
+  });
+
+  protected isFaulty(index: number): boolean {
+    return this.problem()?.positions.includes(index) ?? false;
+  }
   protected readonly lowest = LOWEST_NUMBER;
   protected readonly highest = HIGHEST_NUMBER;
 

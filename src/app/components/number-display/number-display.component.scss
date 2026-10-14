@@ -15,6 +15,13 @@
   .number-input {
     @extend %pill-field;
     width: 220px;
+
+    // A number at fault: the error colour, with the reason said below.
+    &[aria-invalid='true'] {
+      color: var(--error-text);
+      background: var(--error-surface);
+      border-color: var(--error-text);
+    }
   }
 
   .add-button {

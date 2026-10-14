@@ -53,6 +53,44 @@ describe('WinningInputComponent', () => {
     await fixture.whenStable();
   });
 
+  const problem = () => element.querySelector('#winning-problem')?.textContent?.trim();
+  const invalid = () => [0, 1, 2, 3, 4, 5].filter((index) => field(index).getAttribute('aria-invalid') === 'true');
+
+  it('says which number is out of range, and marks its field', async () => {
+    await type(2, '59');
+
+    expect(problem()).toBe('59 is too high: numbers go from 1 to 58.');
+    expect(invalid()).toEqual([2]);
+    expect(field(2).getAttribute('aria-describedby')).toBe('winning-problem');
+  });
+
+  it('waits until a single digit is left before calling it too low', async () => {
+    await type(0, '0');
+    expect(problem()).toBe('');
+
+    field(0).dispatchEvent(new Event('blur'));
+    await fixture.whenStable();
+    expect(problem()).toBe('0 is too low: numbers go from 1 to 58.');
+  });
+
+  it('notices a field left after another one was', async () => {
+    await type(0, '4');
+    field(0).dispatchEvent(new Event('blur'));
+    await type(1, '4');
+    field(1).dispatchEvent(new Event('blur'));
+    await fixture.whenStable();
+
+    expect(problem()).toBe('4 is entered twice.');
+  });
+
+  it('says which number is entered twice, and marks both fields', async () => {
+    await type(0, '16');
+    await type(3, '16');
+
+    expect(problem()).toBe('16 is entered twice.');
+    expect(invalid()).toEqual([0, 3]);
+  });
+
   it('starts with six empty fields and the button disabled', () => {
     expect(fieldValues()).toEqual(['', '', '', '', '', '']);
     expect(setButton().disabled).toBe(true);

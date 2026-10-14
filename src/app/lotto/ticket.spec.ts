@@ -6,6 +6,7 @@ import {
   addNumber,
   checkTicket,
   deleteRow,
+  rowHolding,
   replaceNumber,
   rowLabel,
 } from './ticket';
@@ -147,5 +148,19 @@ describe('checkTicket', () => {
 
   it('checks an empty ticket', () => {
     expect(checkTicket(EMPTY_TICKET, DRAW)).toEqual({ rows: [], bestMatches: 0 });
+  });
+});
+
+describe('rowHolding', () => {
+  it('finds the row being filled when it already has the number', () => {
+    const ticket: Ticket = [[1, 2, 3, 4, 5, 6], [7, 8]];
+
+    expect(rowHolding(ticket, 8)).toBe(1);
+    expect(rowHolding(ticket, 9)).toBeNull();
+  });
+
+  it('has nothing to say when a new number would start a new row', () => {
+    expect(rowHolding([[1, 2, 3, 4, 5, 6]], 3)).toBeNull();
+    expect(rowHolding(EMPTY_TICKET, 3)).toBeNull();
   });
 });

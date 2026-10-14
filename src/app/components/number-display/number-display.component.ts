@@ -13,7 +13,14 @@ import {
   viewChildren
 } from '@angular/core';
 import { NumberBallComponent } from '../number-ball/number-ball.component';
-import { HIGHEST_NUMBER, LOWEST_NUMBER, NUMBERS_PER_DRAW, isLottoNumber } from '../../lotto/games';
+import {
+  HIGHEST_NUMBER,
+  LOWEST_NUMBER,
+  NUMBERS_PER_DRAW,
+  isLottoNumber,
+  rangeMessage,
+} from '../../lotto/games';
+import { DigitsOnlyDirective } from '../digits-only.directive';
 import { Draw } from '../../lotto/draw';
 import {
   EMPTY_TICKET,
@@ -22,12 +29,14 @@ import {
   checkTicket,
   deleteRow,
   replaceNumber,
+  rowHolding,
+  rowLabel,
 } from '../../lotto/ticket';
 
 /** The player's ticket: an entry field, the rows checked against the draw, and row editing. */
 @Component({
   selector: 'app-number-display',
-  imports: [NumberBallComponent],
+  imports: [NumberBallComponent, DigitsOnlyDirective],
   templateUrl: './number-display.component.html',
   styleUrl: './number-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +73,24 @@ export class NumberDisplayComponent {
   });
   protected readonly isInputValid = computed(() => isLottoNumber(this.inputNumber()));
 
+  /** The entry field's text, and whether it has been left since it was typed in. */
+  private readonly entryText = signal('');
+  protected readonly entryLeft = signal(false);
+  /** Set when the number typed is already in the row it would go into. */
+  private readonly repeatMessage = signal<string | null>(null);
+
+  /**
+   * What is wrong with the number in the entry field. Out of range counts once it has two
+   * digits or the field is left, so the 0 on the way to "05" isn't flagged.
+   */
+  protected readonly entryMessage = computed(() => {
+    const repeat = this.repeatMessage();
+    if (repeat) return repeat;
+    const value = this.inputNumber();
+    if (value === undefined || isLottoNumber(value)) return '';
+    return this.entryLeft() || this.entryText().length >= 2 ? rangeMessage(value) : '';
+  });
+
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput');
@@ -76,6 +103,9 @@ export class NumberDisplayComponent {
    */
   protected setNumberInput(value: string): void {
     this.inputNumber.set(value === '' ? undefined : Number(value));
+    this.entryText.set(value);
+    this.entryLeft.set(false);
+    this.repeatMessage.set(null);
 
     if (this.isInputValid() && value.length >= String(HIGHEST_NUMBER).length) {
       this.addNumber();
@@ -86,8 +116,16 @@ export class NumberDisplayComponent {
     const value = this.inputNumber();
     if (!isLottoNumber(value)) return;
 
+    // A repeat isn't added; it stays in the field, with the reason said below it.
+    const holding = rowHolding(this.ticket(), value);
+    if (holding !== null) {
+      this.repeatMessage.set(`${value} is already in row ${rowLabel(holding)}.`);
+      return;
+    }
+
     this.ticket.update((ticket) => addNumber(ticket, value));
     this.inputNumber.set(undefined);
+    this.entryText.set('');
     // [value] only writes to the field when its value changes between checks. A number pasted in one go goes
     // undefined -> 17 -> undefined within one event, so the binding never sees a change: clear the field here.
     const field = this.numberInput()?.nativeElement;
@@ -96,6 +134,7 @@ export class NumberDisplayComponent {
 
   protected clearNumbers(): void {
     this.ticket.set(EMPTY_TICKET);
+    this.repeatMessage.set(null);
     this.editingRow.set(null);
   }
 

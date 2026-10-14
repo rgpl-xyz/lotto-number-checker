@@ -106,6 +106,29 @@ describe('NumberDisplayComponent', () => {
     expect(rows()).toHaveLength(0);
   });
 
+  const entryProblem = () => element.querySelector('#entry-problem')?.textContent?.trim();
+
+  it('says a number already in the row is there, and keeps it in the field', async () => {
+    await addNumbers(7, 21);
+    await type('7');
+    field().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    await fixture.whenStable();
+
+    expect(rowNumbers()).toEqual([[7, 21]]);
+    expect(entryProblem()).toBe('7 is already in row A.');
+    expect(field().value).toBe('7');
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('says a number is out of range once it has two digits', async () => {
+    await type('5');
+    expect(entryProblem()).toBe('');
+
+    await type('59');
+    expect(entryProblem()).toBe('59 is too high: numbers go from 1 to 58.');
+    expect(rowNumbers()).toEqual([]);
+  });
+
   it('highlights matching numbers and the rows with the most matches', async () => {
     fixture.componentRef.setInput('winningNumbers', toDraw([1, 2, 3, 4, 5, 6]));
     await addNumbers(1, 2, 3, 10, 11, 12, 21, 22, 23, 24, 25, 26, 1, 2, 3, 4, 5, 30);

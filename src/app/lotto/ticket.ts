@@ -102,3 +102,12 @@ export function checkTicket(ticket: Ticket, draw: Draw | null): CheckedTicket {
     bestMatches,
   };
 }
+
+/** The row a number added now would go into, if that row already holds it; else null. */
+export function rowHolding(ticket: Ticket, value: number): number | null {
+  const last = ticket.at(-1);
+  if (!last || last.length === NUMBERS_PER_DRAW) {
+    return null;
+  }
+  return last.includes(value) ? ticket.length - 1 : null;
+}

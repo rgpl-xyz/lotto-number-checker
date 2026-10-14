@@ -10,7 +10,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 20px;
 }
 
 // Each winning number goes in an empty ball.
@@ -32,10 +31,18 @@
     outline: 2px solid var(--purple-tint);
     outline-offset: 0;
   }
+
+  // A number at fault: a solid ring in the error colour, with the reason said below.
+  &[aria-invalid='true'] {
+    color: var(--error-text);
+    background: var(--error-surface);
+    border: 2px solid var(--error-text);
+  }
 }
 
 .submit-button {
   @extend %pill;
+  margin-top: 20px;
 }
 
 @media (max-width: 768px) {

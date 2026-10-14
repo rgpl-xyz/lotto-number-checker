@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HIGHEST_NUMBER, LOTTO_GAMES, gameNamed, isLottoNumber } from './games';
+import { HIGHEST_NUMBER, LOTTO_GAMES, gameNamed, isLottoNumber, rangeMessage } from './games';
 
 describe('LOTTO_GAMES', () => {
   it('lists the PCSO six-number games by the names PCSO publishes results under', () => {
@@ -37,5 +37,16 @@ describe('isLottoNumber', () => {
     expect(isLottoNumber(Number.NaN)).toBe(false);
     expect(isLottoNumber(null)).toBe(false);
     expect(isLottoNumber(undefined)).toBe(false);
+  });
+});
+
+describe('rangeMessage', () => {
+  it('says whether a number is too high or too low, and what the range is', () => {
+    expect(rangeMessage(59)).toBe('59 is too high: numbers go from 1 to 58.');
+    expect(rangeMessage(0)).toBe('0 is too low: numbers go from 1 to 58.');
+  });
+
+  it('says a fraction is not a whole number', () => {
+    expect(rangeMessage(1.5)).toBe('1.5 is not a whole number.');
   });
 });
