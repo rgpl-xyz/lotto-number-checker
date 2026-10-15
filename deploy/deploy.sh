@@ -8,12 +8,12 @@
 # back to for hashed files that open tabs still request. Keeps the newest three
 # releases for rollback (see deploy/README.md).
 #
-# Usage, from the repo root on a machine that can `ssh rgpl`:
+# Usage, from the repo root on a machine with the rgpl-deploy ssh alias (deploy/README.md):
 #   deploy/deploy.sh [commit]    # default: origin/main
 set -euo pipefail
 
 APP=lotto
-HOST=${DEPLOY_HOST:-rgpl}
+HOST=${DEPLOY_HOST:-rgpl-deploy}
 SITE_ROOT=${DEPLOY_ROOT:-/var/www/$APP}
 DIST=dist/lotto/browser
 KEEP=3

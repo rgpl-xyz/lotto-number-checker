@@ -9,6 +9,7 @@ The site is the production build (`ng build`, `liveResults` off) served as stati
 | `/var/www/lotto/current` | symlink to the live release; nginx's `root` |
 | `/var/www/lotto/previous` | symlink to the release before it; nginx serves files missing from `current` from here, so tabs opened before a deploy can still load their hashed bundles |
 | `/var/www/lotto/deploy-history` | one line per deploy: UTC time and commit |
+| `/var/www/lotto/` | owned by the `deploy` account, which deploys log in as; it can write here and nowhere else |
 
 ## One-time setup
 
@@ -20,8 +21,26 @@ The site is the production build (`ng build`, `liveResults` off) served as stati
    ssh rgpl 'ln -s /etc/nginx/sites-available/lotto /etc/nginx/sites-enabled/lotto && nginx -t && systemctl reload nginx'
    ```
 
-3. First deploy (below), so `/var/www/lotto/current` exists.
-4. TLS, once DNS resolves to the VPS:
+3. A deploy account, so deploys don't log in as root. It owns `/var/www/lotto` and nothing else, and takes one SSH key, without a terminal or forwarding. The account and key are shared with the other side project on the VPS, so skip what exists:
+
+   ```bash
+   ssh rgpl 'id deploy >/dev/null 2>&1 || useradd --create-home --shell /bin/bash --user-group deploy; install -d -o deploy -g deploy /var/www/lotto'
+   ssh-keygen -t ed25519 -N "" -C "deploys to rgpl" -f ~/.ssh/rgpl-deploy
+   { printf 'restrict '; cat ~/.ssh/rgpl-deploy.pub; } | ssh rgpl 'install -d -m 700 -o deploy -g deploy /home/deploy/.ssh && cat >> /home/deploy/.ssh/authorized_keys && chown deploy:deploy /home/deploy/.ssh/authorized_keys && chmod 600 /home/deploy/.ssh/authorized_keys'
+   ```
+
+   Then add an alias to `~/.ssh/config` on the machine that deploys:
+
+   ```
+   Host rgpl-deploy
+       HostName 45.249.91.118
+       User deploy
+       IdentityFile ~/.ssh/rgpl-deploy
+       IdentitiesOnly yes
+   ```
+
+4. First deploy (below), so `/var/www/lotto/current` exists.
+5. TLS, once DNS resolves to the VPS:
 
    ```bash
    ssh rgpl 'certbot --nginx -d lotto.app.rgpl.xyz --non-interactive --agree-tos --redirect'
@@ -40,11 +59,17 @@ The script refuses commits that are not on `origin/main` and builds from a clean
 
 ## Roll back
 
-Point `current` at an earlier release; no rebuild needed:
+Deploy the earlier commit. Its release is still on the server, so the script switches to it without rebuilding:
 
 ```bash
-ssh rgpl 'ls -1t /var/www/lotto/releases; tail -3 /var/www/lotto/deploy-history'
-ssh rgpl 'cd /var/www/lotto && ln -sfn releases/<commit> current.next && mv -Tf current.next current'
+ssh rgpl-deploy 'ls -1t /var/www/lotto/releases; tail -3 /var/www/lotto/deploy-history'
+deploy/deploy.sh <commit>
+```
+
+Or point `current` at a release by hand:
+
+```bash
+ssh rgpl-deploy 'cd /var/www/lotto && ln -sfn releases/<commit> current.next && mv -Tf current.next current'
 ```
 
 ## Check a deploy
