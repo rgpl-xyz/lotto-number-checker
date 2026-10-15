@@ -44,3 +44,12 @@ Thumbs.db
 # Playwright
 /e2e/test-results/
 /e2e/playwright-report/
+
+# Secrets stay out of the repo: environment files, private keys and certificates.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
