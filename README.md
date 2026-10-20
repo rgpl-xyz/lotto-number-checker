@@ -4,6 +4,8 @@ Check rows of lotto numbers against a draw's winning numbers. Matching numbers a
 
 https://lotto.app.rgpl.xyz
 
+Made by [RGPL](https://rgpl.xyz).
+
 ![Three rows checked against a draw](docs/checker.png)
 
 Enter the six winning numbers, then add your numbers one at a time; they fill rows of six. Rows can be edited or deleted. Numbers go from 1 to 58, which covers the PCSO 6/42, 6/45, 6/49, 6/55 and 6/58 games.
