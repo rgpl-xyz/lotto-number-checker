@@ -36,6 +36,13 @@ const shownWinningNumbers = (element: HTMLElement) =>
   );
 
 describe('WinningNumberComponent', () => {
+  it('enables its fields once it is drawn in the browser', async () => {
+    const { element } = await render();
+
+    expect(element.querySelector<HTMLFieldSetElement>('fieldset.ready-gate')?.disabled).toBe(false);
+    expect(winningField(element, 1).matches(':disabled')).toBe(false);
+  });
+
   it('asks for the winning numbers first', async () => {
     const { element } = await render();
 

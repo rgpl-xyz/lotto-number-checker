@@ -1,8 +1,8 @@
 import { expect, test } from './fixtures';
-import { addNumbers, ballNumbers, setWinningNumbers, ticketRow } from './checker';
+import { addNumbers, ballNumbers, openChecker, setWinningNumbers, ticketRow } from './checker';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await openChecker(page);
   await setWinningNumbers(page, [4, 8, 15, 16, 23, 42]);
 });
 

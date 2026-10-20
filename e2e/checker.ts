@@ -1,8 +1,17 @@
-import { type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 /** The winning number field for position `index`, from 0. */
 export function winningField(page: Page, index: number): Locator {
   return page.getByLabel(`Number ${index + 1}`, { exact: true });
+}
+
+/**
+ * Opens the checker, once the browser has taken over the page the build rendered: its
+ * fields are disabled until then, as anyone typing sooner would find.
+ */
+export async function openChecker(page: Page): Promise<void> {
+  await page.goto('/');
+  await expect(winningField(page, 0)).toBeEnabled();
 }
 
 /** Types the six winning numbers and sets them. */

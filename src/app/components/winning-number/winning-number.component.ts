@@ -1,4 +1,4 @@
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy, afterNextRender } from '@angular/core';
 import { WinningInputComponent } from '../winning-input/winning-input.component';
 import { NumberDisplayComponent } from '../number-display/number-display.component';
 import { SearchResultsComponent } from '../search-results/search-results.component';
@@ -19,6 +19,16 @@ export class WinningNumberComponent {
   readonly useSearch = signal(false);
   readonly winningNumbers = signal<Draw | null>(null);
   readonly isEditMode = signal<boolean>(true);
+  /**
+   * Whether the app has taken over the page the build rendered. Until then its fields and
+   * buttons are disabled: anything typed into them would be lost, as the site's CSP rules
+   * out the inline script of Angular's event replay, which would keep it.
+   */
+  readonly ready = signal(false);
+
+  constructor() {
+    afterNextRender(() => this.ready.set(true));
+  }
 
   setWinningNumbers(draw: Draw): void {
     this.winningNumbers.set(draw);

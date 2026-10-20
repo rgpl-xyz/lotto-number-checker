@@ -17,6 +17,11 @@ h1 {
   @extend %section;
 }
 
+// Groups the sections only to disable them until the app is ready; it adds no box.
+.ready-gate {
+  display: contents;
+}
+
 .numbers-title {
   @extend %section-title;
 }

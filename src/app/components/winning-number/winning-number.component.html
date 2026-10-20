@@ -1,6 +1,8 @@
 <main class="container">
   <h1>{{ title() }}</h1>
 
+  <!-- Disabled until the app takes over the page the build rendered: see ready. -->
+  <fieldset class="ready-gate" [disabled]="!ready()">
   <section class="section">
     @if (isEditMode()) {
     <h2 class="numbers-title">Enter Winning Numbers</h2>
@@ -38,4 +40,5 @@
     <h2 class="numbers-title">Check Your Numbers</h2>
     <app-number-display [winningNumbers]="winningNumbers()" />
   </section>
+  </fieldset>
 </main>

@@ -1,6 +1,6 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './fixtures';
-import { ballNumbers, paste, setWinningNumbers, winningField } from './checker';
+import { ballNumbers, openChecker, paste, setWinningNumbers, winningField } from './checker';
 
 /** The winning numbers on show once they are set. */
 function shownNumbers(page: Page): Promise<number[]> {
@@ -8,7 +8,7 @@ function shownNumbers(page: Page): Promise<number[]> {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await openChecker(page);
 });
 
 test('six typed numbers become the winning numbers', async ({ page }) => {

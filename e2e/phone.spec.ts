@@ -1,5 +1,5 @@
 import { expect, test } from './fixtures';
-import { addNumbers, setWinningNumbers, ticketRow } from './checker';
+import { addNumbers, openChecker, setWinningNumbers, ticketRow } from './checker';
 
 // The narrowest common phone width.
 test.use({ viewport: { width: 360, height: 800 } });
@@ -7,7 +7,7 @@ test.use({ viewport: { width: 360, height: 800 } });
 test('at 360px the balls stay round, every pencil can be tapped and nothing scrolls sideways', async ({
   page,
 }) => {
-  await page.goto('/');
+  await openChecker(page);
   await setWinningNumbers(page, [4, 8, 15, 16, 23, 42]);
   await addNumbers(page, [4, 8, 15, 1, 2, 3]);
   await ticketRow(page, 'A').getByRole('button', { name: 'Edit' }).click();

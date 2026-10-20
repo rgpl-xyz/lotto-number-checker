@@ -43,7 +43,7 @@ Since October 2026 pcso.gov.ph answers the proxy with 403, so expect the error m
 
 ## Deploying
 
-Static build served by nginx on the rgpl VPS. CI runs the unit tests, the build and the e2e tests against that build on every push. Deploys are manual: [deploy/README.md](deploy/README.md).
+Static build served by nginx on the rgpl VPS. The page is rendered at build time, so its text is in the HTML for crawlers that run no scripts; its fields are enabled once the browser has loaded the app. CI runs the unit tests, the build and the e2e tests against that build on every push. Deploys are manual: [deploy/README.md](deploy/README.md).
 
 ## License
 
