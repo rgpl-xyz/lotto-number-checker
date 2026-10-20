@@ -1,1 +1,12 @@
 <router-outlet />
+<footer class="container site-footer">
+  Lotto Number Checker is a demo app
+  <!-- Kept together: a narrow screen breaks after "app", never inside the build. -->
+  <span class="build-line">by RGPL · Build
+  @if (build.href) {
+  <a class="build" [href]="build.href">{{ build.text }}</a>
+  } @else {
+  <span class="build">{{ build.text }}</span>
+  }
+  </span>
+</footer>

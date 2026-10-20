@@ -1,0 +1,33 @@
+// The page fills the window, so the footer sits at its bottom when the checker is shorter.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+// Who made the checker and which build it is: small print at the foot of the page.
+.site-footer {
+  // Full width: in a flex column, the column side margins alone would shrink it to its text.
+  width: 100%;
+  margin-top: auto;
+  padding-bottom: 40px;
+  font-size: 13px;
+  color: var(--purple-muted);
+
+  a {
+    color: inherit;
+  }
+}
+
+.build-line {
+  white-space: nowrap;
+}
+
+// The build, set as commits usually are, a shade smaller so it is no louder than the text.
+.build {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.95em;
+  text-underline-offset: 2px;
+}
